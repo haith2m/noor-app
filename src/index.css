@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "SF-Pro";
+  src: url("../public/fonts/SF-Pro.ttf");
+}
+
+@font-face {
+  font-family: "SF-Arabic";
+  src: url("../public/fonts/SFArabic-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Naskh";
+  src: url("../public/fonts/UthmanTN_v2-0.ttf");
+}
+
+@font-face {
+  font-family: "Hafs";
+  src: url("../public/fonts/UthmanicHafs.ttf");
+}
+
+:root {
+  --bg-color: #fff;
+  --text: #0f0f0f;
+  --text-2: #6b6b6b;
+  --bg-color-2: #eeeeee;
+  --bg-color-3: #dbdbdb;
+  --color: #000000;
+}
+
+.light {
+  --bg-color: #f8f8f8;
+  --text: #0f0f0f;
+  --text-2: #6b6b6b;
+  --bg-color-2: #eaeaea;
+  --bg-color-3: #e1e1e1;
+}
+
+.dark {
+  --bg-color: #101011;
+  --text: #fff;
+  --text-2: #b0b0b0;
+  --bg-color-2: #1a1a1a;
+  --bg-color-3: #262626;
+}
+
+.naskh-font {
+  font-family: "Naskh";
+}
+
+.ayah {
+  font-family: "Hafs";
+  font-size: 1.5rem;
+  line-height: 1.5;
+  text-align: right;
+  direction: rtl;
+  margin: 0;
+}
+
+
+
+html,body {
+  font-family: "SF-Pro", "SF-Arabic", sans-serif;
+  font-style: normal;
+  background-color: var(--bg-color);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.bg-image::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.15;
+  mask-image: linear-gradient(180deg, #000000 40%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000000 40%, transparent);
+  background-repeat: no-repeat;
+  background-image: url("../public/Mosque.svg");
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.fadeIn-300 {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.fadeInFast {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fadeOut {
+  animation: fadeOut 0.5s ease-in-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.slideIn {
+  animation: slideIn;
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-duration: 150ms;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.slideUp {
+  animation: slideUp;
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-duration: 150ms;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(200%);
+  }
+}
+
+.slideDown {
+  animation: slideDown;
+  animation-fill-mode: forwards;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-duration: 150ms;
+}
+
+.disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+nav {
+  height: 35px;
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-color-2);
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.border-05 {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+nav > .buttons {
+  -webkit-app-region: no-drag;
+}
+
+.draggable {
+  -webkit-app-region: drag;
+}
+
+.draggable > button {
+  -webkit-app-region: no-drag;
+}
+
+input[type="range"] {
+  cursor: pointer;
+  outline: none;
+  border-radius: 15px;
+  height: 6px;
+  background-image : linear-gradient(var(--color), var(--color));
+  background-size: 0% 100%;
+  background-repeat: no-repeat;
+  accent-color: var(--color);
+}
+.progress-bar::-webkit-slider-thumb {
+  width: 0;
+  height: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+input[type="range"]::-moz-range-thumb {
+  height: 15px;
+  width: 15px;
+  background-color: var(--color);
+  border-radius: 50%;
+  border: none;
+  transition: .2s ease-in-out;
+}

@@ -1,0 +1,916 @@
+{
+  "suwar": [
+    {
+      "id": 1,
+      "name": "\u0627\u0644\u0641\u0627\u062a\u062d\u0629",
+      "start_page": 1,
+      "end_page": 1,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 2,
+      "name": "\u0627\u0644\u0628\u0642\u0631\u0629",
+      "start_page": 2,
+      "end_page": 49,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 3,
+      "name": "\u0622\u0644 \u0639\u0645\u0631\u0627\u0646",
+      "start_page": 50,
+      "end_page": 76,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 4,
+      "name": "\u0627\u0644\u0646\u0633\u0627\u0621",
+      "start_page": 77,
+      "end_page": 106,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 5,
+      "name": "\u0627\u0644\u0645\u0627\u0626\u062f\u0629",
+      "start_page": 106,
+      "end_page": 127,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 6,
+      "name": "\u0627\u0644\u0623\u0646\u0639\u0627\u0645",
+      "start_page": 128,
+      "end_page": 150,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 7,
+      "name": "\u0627\u0644\u0623\u0639\u0631\u0627\u0641",
+      "start_page": 151,
+      "end_page": 176,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 8,
+      "name": "\u0627\u0644\u0623\u0646\u0641\u0627\u0644",
+      "start_page": 177,
+      "end_page": 186,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 9,
+      "name": "\u0627\u0644\u062a\u0648\u0628\u0629",
+      "start_page": 187,
+      "end_page": 207,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 10,
+      "name": "\u064a\u0648\u0646\u0633",
+      "start_page": 208,
+      "end_page": 221,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 11,
+      "name": "\u0647\u0648\u062f",
+      "start_page": 221,
+      "end_page": 235,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 12,
+      "name": "\u064a\u0648\u0633\u0641",
+      "start_page": 235,
+      "end_page": 248,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 13,
+      "name": "\u0627\u0644\u0631\u0639\u062f",
+      "start_page": 249,
+      "end_page": 255,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 14,
+      "name": "\u0625\u0628\u0631\u0627\u0647\u064a\u0645",
+      "start_page": 255,
+      "end_page": 261,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 15,
+      "name": "\u0627\u0644\u062d\u062c\u0631",
+      "start_page": 262,
+      "end_page": 267,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 16,
+      "name": "\u0627\u0644\u0646\u062d\u0644",
+      "start_page": 267,
+      "end_page": 281,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 17,
+      "name": "\u0627\u0644\u0625\u0633\u0631\u0627\u0621",
+      "start_page": 282,
+      "end_page": 293,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 18,
+      "name": "\u0627\u0644\u0643\u0647\u0641",
+      "start_page": 293,
+      "end_page": 304,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 19,
+      "name": "\u0645\u0631\u064a\u0645",
+      "start_page": 305,
+      "end_page": 312,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 20,
+      "name": "\u0637\u0647",
+      "start_page": 312,
+      "end_page": 321,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 21,
+      "name": "\u0627\u0644\u0623\u0646\u0628\u064a\u0627\u0621",
+      "start_page": 322,
+      "end_page": 331,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 22,
+      "name": "\u0627\u0644\u062d\u062c",
+      "start_page": 332,
+      "end_page": 341,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 23,
+      "name": "\u0627\u0644\u0645\u0624\u0645\u0646\u0648\u0646",
+      "start_page": 342,
+      "end_page": 349,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 24,
+      "name": "\u0627\u0644\u0646\u0648\u0631",
+      "start_page": 350,
+      "end_page": 359,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 25,
+      "name": "\u0627\u0644\u0641\u0631\u0642\u0627\u0646",
+      "start_page": 359,
+      "end_page": 366,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 26,
+      "name": "\u0627\u0644\u0634\u0639\u0631\u0627\u0621",
+      "start_page": 367,
+      "end_page": 376,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 27,
+      "name": "\u0627\u0644\u0646\u0645\u0644",
+      "start_page": 377,
+      "end_page": 385,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 28,
+      "name": "\u0627\u0644\u0642\u0635\u0635",
+      "start_page": 385,
+      "end_page": 396,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 29,
+      "name": "\u0627\u0644\u0639\u0646\u0643\u0628\u0648\u062a",
+      "start_page": 396,
+      "end_page": 404,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 30,
+      "name": "\u0627\u0644\u0631\u0648\u0645",
+      "start_page": 404,
+      "end_page": 410,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 31,
+      "name": "\u0644\u0642\u0645\u0627\u0646",
+      "start_page": 411,
+      "end_page": 414,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 32,
+      "name": "\u0627\u0644\u0633\u062c\u062f\u0629",
+      "start_page": 415,
+      "end_page": 417,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 33,
+      "name": "\u0627\u0644\u0623\u062d\u0632\u0627\u0628",
+      "start_page": 418,
+      "end_page": 427,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 34,
+      "name": "\u0633\u0628\u0623",
+      "start_page": 428,
+      "end_page": 434,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 35,
+      "name": "\u0641\u0627\u0637\u0631",
+      "start_page": 434,
+      "end_page": 440,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 36,
+      "name": "\u064a\u0633",
+      "start_page": 440,
+      "end_page": 445,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 37,
+      "name": "\u0627\u0644\u0635\u0627\u0641\u0627\u062a",
+      "start_page": 446,
+      "end_page": 452,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 38,
+      "name": "\u0635",
+      "start_page": 453,
+      "end_page": 458,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 39,
+      "name": "\u0627\u0644\u0632\u0645\u0631",
+      "start_page": 458,
+      "end_page": 467,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 40,
+      "name": "\u063a\u0627\u0641\u0631",
+      "start_page": 467,
+      "end_page": 476,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 41,
+      "name": "\u0641\u0635\u0644\u062a",
+      "start_page": 477,
+      "end_page": 482,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 42,
+      "name": "\u0627\u0644\u0634\u0648\u0631\u0649",
+      "start_page": 483,
+      "end_page": 489,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 43,
+      "name": "\u0627\u0644\u0632\u062e\u0631\u0641",
+      "start_page": 489,
+      "end_page": 495,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 44,
+      "name": "\u0627\u0644\u062f\u0651\u062e\u0627\u0646",
+      "start_page": 496,
+      "end_page": 498,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 45,
+      "name": "\u0627\u0644\u062c\u0627\u062b\u064a\u0629",
+      "start_page": 499,
+      "end_page": 502,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 46,
+      "name": "\u0627\u0644\u0623\u062d\u0642\u0627\u0641",
+      "start_page": 502,
+      "end_page": 506,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 47,
+      "name": "\u0645\u062d\u0645\u062f",
+      "start_page": 507,
+      "end_page": 510,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 48,
+      "name": "\u0627\u0644\u0641\u062a\u062d",
+      "start_page": 511,
+      "end_page": 515,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 49,
+      "name": "\u0627\u0644\u062d\u062c\u0631\u0627\u062a",
+      "start_page": 515,
+      "end_page": 517,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 50,
+      "name": "\u0642",
+      "start_page": 518,
+      "end_page": 520,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 51,
+      "name": "\u0627\u0644\u0630\u0627\u0631\u064a\u0627\u062a",
+      "start_page": 520,
+      "end_page": 523,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 52,
+      "name": "\u0627\u0644\u0637\u0648\u0631",
+      "start_page": 523,
+      "end_page": 525,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 53,
+      "name": "\u0627\u0644\u0646\u062c\u0645",
+      "start_page": 526,
+      "end_page": 528,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 54,
+      "name": "\u0627\u0644\u0642\u0645\u0631",
+      "start_page": 528,
+      "end_page": 531,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 55,
+      "name": "\u0627\u0644\u0631\u062d\u0645\u0646",
+      "start_page": 531,
+      "end_page": 534,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 56,
+      "name": "\u0627\u0644\u0648\u0627\u0642\u0639\u0629",
+      "start_page": 534,
+      "end_page": 537,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 57,
+      "name": "\u0627\u0644\u062d\u062f\u064a\u062f",
+      "start_page": 537,
+      "end_page": 541,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 58,
+      "name": "\u0627\u0644\u0645\u062c\u0627\u062f\u0644\u0629",
+      "start_page": 542,
+      "end_page": 545,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 59,
+      "name": "\u0627\u0644\u062d\u0634\u0631",
+      "start_page": 545,
+      "end_page": 548,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 60,
+      "name": "\u0627\u0644\u0645\u0645\u062a\u062d\u0646\u0629",
+      "start_page": 549,
+      "end_page": 551,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 61,
+      "name": "\u0627\u0644\u0635\u0641",
+      "start_page": 551,
+      "end_page": 552,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 62,
+      "name": "\u0627\u0644\u062c\u0645\u0639\u0629",
+      "start_page": 553,
+      "end_page": 554,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 63,
+      "name": "\u0627\u0644\u0645\u0646\u0627\u0641\u0642\u0648\u0646",
+      "start_page": 554,
+      "end_page": 555,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 64,
+      "name": "\u0627\u0644\u062a\u063a\u0627\u0628\u0646",
+      "start_page": 556,
+      "end_page": 557,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 65,
+      "name": "\u0627\u0644\u0637\u0644\u0627\u0642",
+      "start_page": 558,
+      "end_page": 559,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 66,
+      "name": "\u0627\u0644\u062a\u062d\u0631\u064a\u0645",
+      "start_page": 560,
+      "end_page": 561,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 67,
+      "name": "\u0627\u0644\u0645\u0644\u0643",
+      "start_page": 562,
+      "end_page": 564,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 68,
+      "name": "\u0627\u0644\u0642\u0644\u0645",
+      "start_page": 564,
+      "end_page": 566,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 69,
+      "name": "\u0627\u0644\u062d\u0627\u0642\u0629",
+      "start_page": 566,
+      "end_page": 568,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 70,
+      "name": "\u0627\u0644\u0645\u0639\u0627\u0631\u062c",
+      "start_page": 568,
+      "end_page": 570,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 71,
+      "name": "\u0646\u0648\u062d",
+      "start_page": 570,
+      "end_page": 571,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 72,
+      "name": "\u0627\u0644\u062c\u0646",
+      "start_page": 572,
+      "end_page": 573,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 73,
+      "name": "\u0627\u0644\u0645\u0632\u0645\u0644",
+      "start_page": 574,
+      "end_page": 575,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 74,
+      "name": "\u0627\u0644\u0645\u062f\u062b\u0631",
+      "start_page": 575,
+      "end_page": 577,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 75,
+      "name": "\u0627\u0644\u0642\u064a\u0627\u0645\u0629",
+      "start_page": 577,
+      "end_page": 578,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 76,
+      "name": "\u0627\u0644\u0625\u0646\u0633\u0627\u0646",
+      "start_page": 578,
+      "end_page": 580,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 77,
+      "name": "\u0627\u0644\u0645\u0631\u0633\u0644\u0627\u062a",
+      "start_page": 580,
+      "end_page": 581,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 78,
+      "name": "\u0627\u0644\u0646\u0628\u0623",
+      "start_page": 582,
+      "end_page": 583,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 79,
+      "name": "\u0627\u0644\u0646\u0627\u0632\u0639\u0627\u062a",
+      "start_page": 583,
+      "end_page": 584,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 80,
+      "name": "\u0639\u0628\u0633",
+      "start_page": 585,
+      "end_page": 586,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 81,
+      "name": "\u0627\u0644\u062a\u0643\u0648\u064a\u0631",
+      "start_page": 586,
+      "end_page": 586,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 82,
+      "name": "\u0627\u0644\u0625\u0646\u0641\u0637\u0627\u0631",
+      "start_page": 587,
+      "end_page": 587,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 83,
+      "name": "\u0627\u0644\u0645\u0637\u0641\u0641\u064a\u0646",
+      "start_page": 587,
+      "end_page": 589,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 84,
+      "name": "\u0627\u0644\u0625\u0646\u0634\u0642\u0627\u0642",
+      "start_page": 589,
+      "end_page": 590,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 85,
+      "name": "\u0627\u0644\u0628\u0631\u0648\u062c",
+      "start_page": 590,
+      "end_page": 590,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 86,
+      "name": "\u0627\u0644\u0637\u0627\u0631\u0642",
+      "start_page": 591,
+      "end_page": 591,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 87,
+      "name": "\u0627\u0644\u0623\u0639\u0644\u0649",
+      "start_page": 591,
+      "end_page": 592,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 88,
+      "name": "\u0627\u0644\u063a\u0627\u0634\u064a\u0629",
+      "start_page": 592,
+      "end_page": 593,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 89,
+      "name": "\u0627\u0644\u0641\u062c\u0631",
+      "start_page": 593,
+      "end_page": 594,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 90,
+      "name": "\u0627\u0644\u0628\u0644\u062f",
+      "start_page": 594,
+      "end_page": 595,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 91,
+      "name": "\u0627\u0644\u0634\u0645\u0633",
+      "start_page": 595,
+      "end_page": 595,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 92,
+      "name": "\u0627\u0644\u0644\u064a\u0644",
+      "start_page": 595,
+      "end_page": 596,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 93,
+      "name": "\u0627\u0644\u0636\u062d\u0649",
+      "start_page": 596,
+      "end_page": 596,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 94,
+      "name": "\u0627\u0644\u0634\u0631\u062d",
+      "start_page": 596,
+      "end_page": 597,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 95,
+      "name": "\u0627\u0644\u062a\u064a\u0646",
+      "start_page": 597,
+      "end_page": 597,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 96,
+      "name": "\u0627\u0644\u0639\u0644\u0642",
+      "start_page": 597,
+      "end_page": 598,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 97,
+      "name": "\u0627\u0644\u0642\u062f\u0631",
+      "start_page": 598,
+      "end_page": 598,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 98,
+      "name": "\u0627\u0644\u0628\u064a\u0646\u0629",
+      "start_page": 598,
+      "end_page": 599,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 99,
+      "name": "\u0627\u0644\u0632\u0644\u0632\u0644\u0629",
+      "start_page": 599,
+      "end_page": 599,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 100,
+      "name": "\u0627\u0644\u0639\u0627\u062f\u064a\u0627\u062a",
+      "start_page": 599,
+      "end_page": 600,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 101,
+      "name": "\u0627\u0644\u0642\u0627\u0631\u0639\u0629",
+      "start_page": 600,
+      "end_page": 600,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 102,
+      "name": "\u0627\u0644\u062a\u0643\u0627\u062b\u0631",
+      "start_page": 600,
+      "end_page": 600,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 103,
+      "name": "\u0627\u0644\u0639\u0635\u0631",
+      "start_page": 601,
+      "end_page": 601,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 104,
+      "name": "\u0627\u0644\u0647\u0645\u0632\u0629",
+      "start_page": 601,
+      "end_page": 601,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 105,
+      "name": "\u0627\u0644\u0641\u064a\u0644",
+      "start_page": 601,
+      "end_page": 601,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 106,
+      "name": "\u0642\u0631\u064a\u0634",
+      "start_page": 602,
+      "end_page": 602,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 107,
+      "name": "\u0627\u0644\u0645\u0627\u0639\u0648\u0646",
+      "start_page": 602,
+      "end_page": 602,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 108,
+      "name": "\u0627\u0644\u0643\u0648\u062b\u0631",
+      "start_page": 602,
+      "end_page": 602,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 109,
+      "name": "\u0627\u0644\u0643\u0627\u0641\u0631\u0648\u0646",
+      "start_page": 603,
+      "end_page": 603,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 110,
+      "name": "\u0627\u0644\u0646\u0635\u0631",
+      "start_page": 603,
+      "end_page": 603,
+      "makkia": 0,
+      "type": 1
+    },
+    {
+      "id": 111,
+      "name": "\u0627\u0644\u0645\u0633\u062f",
+      "start_page": 603,
+      "end_page": 603,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 112,
+      "name": "\u0627\u0644\u0625\u062e\u0644\u0627\u0635",
+      "start_page": 604,
+      "end_page": 604,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 113,
+      "name": "\u0627\u0644\u0641\u0644\u0642",
+      "start_page": 604,
+      "end_page": 604,
+      "makkia": 1,
+      "type": 0
+    },
+    {
+      "id": 114,
+      "name": "\u0627\u0644\u0646\u0627\u0633",
+      "start_page": 604,
+      "end_page": 604,
+      "makkia": 1,
+      "type": 0
+    }
+  ]
+}
