@@ -34,15 +34,15 @@ i18next.init({
 let mainWindow;
 let tray = null;
 
-function getIcon(filename) {
-  const ext = process.platform === "linux" ? "png" : "ico";
+function getIcon(filename,extension) {
+  const ext = extension || (process.platform === "linux" ? "png" : "ico");
   const devPath = path.join(__dirname, "../public", `${filename}.${ext}`);
   const prodPath = path.join(__dirname, "../build", `${filename}.${ext}`);
   return isDev ? devPath : prodPath;
 }
 
 function createTray() {
-  tray = new Tray(getIcon("app"));
+  tray = new Tray(getIcon("icon","png"));
 
   const contextMenu = Menu.buildFromTemplate([
     {
