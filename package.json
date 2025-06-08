@@ -2,8 +2,7 @@
   "name": "noor",
   "description": "Islamic desktop app with prayer times, Azkar, Quran audio, and Hijri calendar.",
   "author": "Haitham Almaymouni",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.0",
   "main": "public/electron.js",
   "homepage": "./",
   "repository": {
@@ -17,7 +16,6 @@
       "provider": "github",
       "owner": "haith2m",
       "repo": "noor-app",
-      "private": true,
       "releaseType": "release",
       "vPrefixedTagName": true
     },
@@ -55,6 +53,7 @@
     "react-dom": "^17.0.2",
     "react-i18next": "^14.1.2",
     "react-icons": "^5.3.0",
+    "react-quran": "^1.2.5",
     "react-router": "^6.23.1",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.0",

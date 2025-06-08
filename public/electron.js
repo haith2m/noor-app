@@ -91,7 +91,7 @@ function createMainWindow() {
     frame: false,
     icon: path.join(__dirname, "../public/app.ico"),
     webPreferences: {
-      devTools: false,
+      devTools: true,
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
     },
