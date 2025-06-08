@@ -19,11 +19,10 @@ const { autoUpdater } = require("electron-updater");
 Store.initRenderer();
 const store = new Store();
 
-const systemLang = app.getLocale().split("-")[0];
 const settings = store.get("settings") || {};
 
 i18next.init({
-  lng: settings.language || systemLang || "ar",
+  lng: settings.language || "ar",
   supportedLngs: ["ar", "en"],
   fallbackLng: "ar",
   resources: {
@@ -59,7 +58,9 @@ function createTray() {
     {
       label: i18next.t("check_for_updates", "Check for Updates"),
       click: () => {
-        if (!isDev) autoUpdater.checkForUpdatesAndNotify();
+        if (!isDev) {
+          autoUpdater.checkForUpdatesAndNotify();
+        }
       },
     },
     { type: "separator" },
@@ -93,7 +94,7 @@ function createMainWindow() {
     frame: false,
     icon: getIcon("app"),
     webPreferences: {
-      devTools: false,
+      devTools: true,
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
     },
@@ -104,22 +105,34 @@ function createMainWindow() {
     : `file://${path.join(__dirname, "../build/index.html")}`;
 
   mainWindow.loadURL(mainURL);
+
+  // Create system tray
   createTray();
 
+  // Handle close button
   mainWindow.on("close", (event) => {
-    if (!app.isQuitting && (store.get("settings")?.minimize_to_tray ?? true)) {
-      event.preventDefault();
-      mainWindow.hide();
+    if (!app.isQuitting) {
+      const userSettings = store.get("settings") || {};
+      if (userSettings.minimize_to_tray) {
+        event.preventDefault();
+        mainWindow.hide();
+        return false;
+      }
     }
+    return true;
   });
 
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
 
-  if (!isDev) initAutoUpdater();
+  // Initialize auto-updater after window creation
+  if (!isDev) {
+    initAutoUpdater();
+  }
 }
 
+// Configure and initialize auto-updater
 function initAutoUpdater() {
   autoUpdater.setFeedURL({
     provider: "github",
@@ -127,43 +140,62 @@ function initAutoUpdater() {
     repo: "noor-app",
   });
 
-  autoUpdater.checkForUpdatesAndNotify();
-  setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 60 * 60 * 1000);
+  // Don't check for updates automatically on startup
+  // Only check when user explicitly requests it
 
-  autoUpdater.on("checking-for-update", () =>
-    console.log("Checking for updates..."),
-  );
+  // Auto updater events
+  autoUpdater.on("checking-for-update", () => {
+    console.log("Checking for updates...");
+  });
 
   autoUpdater.on("update-available", (info) => {
     console.log("Update available:", info);
     mainWindow?.webContents.send("update-available");
   });
 
+  autoUpdater.on("update-not-available", (info) => {
+    console.log("Update not available:", info);
+    mainWindow?.webContents.send("update-check-result", {
+      type: "no-update",
+      message: i18next.t("app_up_to_date", "You are running the latest version")
+    });
+  });
+
   autoUpdater.on("update-downloaded", (info) => {
     console.log("Update downloaded:", info);
-    new Notification({
+    // Notify the user that update is ready
+    const notification = new Notification({
       title: i18next.t("update_ready_title", "Update Ready"),
       body: i18next.t(
         "update_ready_message",
-        "A new version has been downloaded. Restart the application to apply the updates.",
+        "A new version has been downloaded. Restart the application to apply the updates."
       ),
       icon: getIcon("app"),
-    }).show();
+    });
+    notification.show();
 
     mainWindow?.webContents.send("update-downloaded");
   });
 
   autoUpdater.on("error", (err) => {
-    console.error("Auto-updater error:", err);
+    console.error("Error in auto-updater:", err);
+    mainWindow?.webContents.send("update-check-result", {
+      type: "error",
+      error: err,
+      message: i18next.t("update_error_message", "Failed to check for updates")
+    });
   });
 }
 
-function getResourcePath(name) {
-  return isDev
-    ? `http://localhost:3000/${name}`
-    : path.join(app.getAppPath(), "build", name);
+function getResourcePath(resourceName) {
+  if (isDev) {
+    return `http://localhost:3000/${resourceName}`;
+  } else {
+    return path.join(app.getAppPath(), "build", resourceName);
+  }
 }
 
+// Reset daily notifications
 function resetDailyNotifications() {
   const currentDate = new Date().toLocaleDateString();
   if (store.get("lastNotificationDate") !== currentDate) {
@@ -173,30 +205,44 @@ function resetDailyNotifications() {
 }
 
 function sendPrayerNotification(prayer) {
-  const sent = { ...(store.get("sentNotifications") || {}) };
-  if (sent[prayer]) return;
+  try {
+    const sentNotifications = { ...(store.get("sentNotifications") || {}) };
 
-  new Notification({
-    title: i18next.t("notification_title"),
-    body: i18next.t("notification_body", { prayer: i18next.t(prayer) }),
-    icon: getIcon("app"),
-    urgency: "critical",
-    timeoutType: "never",
-    silent: true,
-  }).show();
+    // Check if notification was already sent for this prayer
+    if (sentNotifications[prayer]) {
+      return;
+    }
 
-  if (mainWindow) {
-    const adhanPath = getResourcePath("adhan.wav");
-    mainWindow.webContents.send("play-adhan", {
-      path: adhanPath,
-      appPath: adhanPath,
+    // send notification
+    const notification = new Notification({
+      title: i18next.t("notification_title"),
+      body: i18next.t("notification_body", { prayer: i18next.t(prayer) }),
+      icon: getIcon("app"),
+      urgency: "critical",
+      timeoutType: "never",
+      silent: true,
     });
-  }
 
-  sent[prayer] = true;
-  store.set("sentNotifications", sent);
+    notification.show();
+
+    // Play adhan
+    if (mainWindow) {
+      const adhanPath = getResourcePath("adhan.wav");
+      mainWindow.webContents.send("play-adhan", {
+        path: adhanPath,
+        appPath: adhanPath,
+      });
+      console.log("Sending adhan path:", adhanPath);
+    }
+
+    sentNotifications[prayer] = true;
+    store.set("sentNotifications", sentNotifications);
+  } catch (error) {
+    console.error("Error sending prayer notification:", error);
+  }
 }
 
+// Prayer times check cron job - runs every minute
 cron.schedule("* * * * *", async () => {
   try {
     resetDailyNotifications();
@@ -204,64 +250,122 @@ cron.schedule("* * * * *", async () => {
     const location = store.get("location");
     const settings = store.get("settings") || {};
 
-    if (!settings.adhan_notifications || !location?.latitude) return;
-
-    const coords = new Coordinates(location.latitude, location.longitude);
-    const method = settings.calculationMethod || "UmmAlQura";
-    const params = CalculationMethod[method]();
-
-    let prayerTimes;
-    try {
-      prayerTimes = new PrayerTimes(coords, new Date(), params);
-    } catch (e) {
-      console.error("Prayer time calc error:", e);
+    if (!settings.adhan_notifications) {
       return;
     }
 
-    const now = moment();
+    if (!location || !location.latitude || !location.longitude) {
+      console.log("No location configured");
+      return;
+    }
+
+    const coordinates = new Coordinates(location.latitude, location.longitude);
+    const method = settings.calculationMethod || "UmmAlQura";
+    const params = CalculationMethod[method]();
+
+    // Calculate prayer times with error handling
+    let prayerTimes;
+    try {
+      prayerTimes = new PrayerTimes(coordinates, new Date(), params);
+    } catch (error) {
+      console.error("Error calculating prayer times:", error);
+      return;
+    }
+
     const currentPrayer = prayerTimes.currentPrayer();
     const nextPrayer = prayerTimes.nextPrayer();
-    const prayer = currentPrayer === "none" ? nextPrayer : currentPrayer;
 
+    // Get the prayer time we want to check
+    const prayerToCheck = currentPrayer === "none" ? nextPrayer : currentPrayer;
+
+    // Only send notifications for the 5 prayers
     const mainPrayers = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
-    if (prayer && mainPrayers.includes(prayer)) {
-      const prayerTime = moment(prayerTimes.timeForPrayer(prayer));
+
+    if (prayerToCheck && mainPrayers.includes(prayerToCheck)) {
+      const prayerTime = moment(prayerTimes.timeForPrayer(prayerToCheck));
+      const now = moment();
+
       if (Math.abs(prayerTime.diff(now, "minutes")) <= 1) {
-        mainWindow?.webContents.send("reload-prayers");
-        sendPrayerNotification(prayer);
+        mainWindow.webContents.send("reload-prayers");
+        sendPrayerNotification(prayerToCheck);
       }
     }
-  } catch (e) {
-    console.error("Prayer cron error:", e);
+  } catch (error) {
+    console.error("Error in prayer check cron job:", error);
   }
 });
 
-// App events
-app.on("ready", createMainWindow);
+// Electron app event handlers
+app.on("ready", () => {
+  createMainWindow();
+});
+
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
+
 app.on("activate", () => {
   if (!mainWindow) createMainWindow();
 });
+
+// Set app.isQuitting flag when quitting
 app.on("before-quit", () => {
   app.isQuitting = true;
-  tray?.destroy();
-  tray = null;
+  if (tray) {
+    tray.destroy();
+    tray = null;
+  }
 });
 
-// IPC
-ipcMain.on("minimize", () => mainWindow?.minimize());
-ipcMain.on("maximize", () =>
-  mainWindow?.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize(),
-);
-ipcMain.on("isMaxmized", () =>
-  mainWindow?.webContents.send("isMaxmized", mainWindow.isMaximized()),
-);
-ipcMain.on("close", () => mainWindow?.close());
-ipcMain.on("open-url", (e, url) => shell.openExternal(url));
-ipcMain.handle("get-resource-path", (e, name) => getResourcePath(name));
-ipcMain.on("restart-app", () => autoUpdater.quitAndInstall());
+// IPC event handlers for window control
+ipcMain.on("minimize", () => mainWindow.minimize());
+ipcMain.on("maximize", () => {
+  mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
+});
+ipcMain.on("isMaxmized", () => {
+  mainWindow.isMaximized()
+    ? mainWindow.webContents.send("isMaxmized", true)
+    : mainWindow.webContents.send("isMaxmized", false);
+});
+ipcMain.on("close", () => mainWindow.close());
+ipcMain.on("open-url", (event, url) => {
+  shell.openExternal(url);
+});
+ipcMain.handle("get-resource-path", (event, resourceName) => {
+  return getResourcePath(resourceName);
+});
+
+// Add IPC handlers for updates
+ipcMain.on("restart-app", () => {
+  autoUpdater.quitAndInstall();
+});
+
 ipcMain.on("check-for-updates", () => {
-  if (!isDev) autoUpdater.checkForUpdatesAndNotify();
+  if (isDev) {
+    // In development mode, show a message that updates are not available
+    mainWindow.webContents.send("update-check-result", {
+      type: "dev-mode",
+      message: i18next.t("updates_disabled_dev", "Update checking is disabled in development mode")
+    });
+    console.log("Update checking is disabled in development mode");
+    return;
+  }
+  
+  try {
+    // Notify that we're checking for updates
+    mainWindow.webContents.send("update-check-result", {
+      type: "checking",
+      message: i18next.t("checking_for_updates", "Checking for updates...")
+    });
+    
+    autoUpdater.checkForUpdatesAndNotify();
+    console.log("Checking for updates...");
+  } catch (error) {
+    console.error("Error checking for updates:", error);
+    mainWindow.webContents.send("update-check-result", {
+      type: "error",
+      error: error,
+      message: i18next.t("update_error_message", "Failed to check for updates")
+    });
+  }
 });
