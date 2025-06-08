@@ -13,7 +13,6 @@ import Settings from "./components/Settings";
 import { PageProvider, usePage } from "./PageContext";
 import TitleBar from "./components/TitleBar";
 import AzkarCategories from "./components/Azkar/AzkarCategories";
-import Quran from "./components/Quran/Quran";
 import Calendar from "./components/Calendar/Calendar";
 import SoundPlayer from "./components/SoundPlayer";
 import MacroSearch from "./components/MacroSearch";
@@ -25,6 +24,8 @@ import {
   IconSunrise,
   IconSunset,
 } from "@tabler/icons-react";
+import AudioQuran from "./components/AudioQuran/AudioQuran";
+import Quran from "./components/Quran/Quran";
 
 function MainApp() {
   const [data, setData] = useState(null);
@@ -139,13 +140,23 @@ function MainApp() {
     fetchLocationData();
 
     document.title = `${t("noor")} - ${t(
-      currentPage.startsWith("quran-")
-        ? "quran"
+      currentPage.startsWith("quran-audio")
+        ? "audio_quran"
         : currentPage.startsWith("azkar-")
         ? "azkar"
         : currentPage
     )}`;
-  }, [i18n.language]);
+    console.log(
+      `setting title to ${t("noor")} - ${t(
+        currentPage.startsWith("quran-audio")
+          ? "audio_quran"
+          : currentPage.startsWith("azkar-")
+          ? "azkar"
+          : currentPage
+      )}`,
+      t
+    );
+  }, [i18n.language, currentPage, t]);
 
   useEffect(() => {
     if (data) {
@@ -171,14 +182,14 @@ function MainApp() {
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Open search with Ctrl+K or Command+K
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         setSearchOpen(true);
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   if (!data || !prayers) {
@@ -203,21 +214,22 @@ function MainApp() {
               <Home prayersData={prayers} />
             </>
           )}
-          {currentPage.startsWith("quran-") && (
-            <Quran
-              Reciter={currentPage.split("-")[1]}
+          {currentPage.startsWith("quran-audio-") && (
+            <AudioQuran
+              Reciter={currentPage.split("-")[2]}
               Surah={currentPage.split("-")[2] || null}
             />
           )}
-          {currentPage === "quran" && <Quran />}
+          {currentPage === "quran-audio" && <AudioQuran />}
           {currentPage.startsWith("azkar-") && (
             <Azkar category={currentPage.split("-")[1]} />
           )}
+          {currentPage === "quran" && <Quran />}
           {currentPage === "azkar" && <AzkarCategories />}
           {currentPage === "settings" && <Settings />}
           {currentPage === "calendar" && <Calendar />}
         </div>
-        
+
         {/* Add the MacroSearch component */}
         <MacroSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       </>

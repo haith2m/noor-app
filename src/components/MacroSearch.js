@@ -10,6 +10,7 @@ import {
   IconChevronLeft,
   IconHome,
   IconCalendar,
+  IconHeadphones,
 } from "@tabler/icons-react";
 import AzkarIcon from "./AzkarIcon";
 
@@ -96,10 +97,10 @@ function MacroSearch({ isOpen, onClose }) {
         icon: <IconHome size={20} />,
       },
       {
-        id: "quran",
-        name: t("quran"),
-        page: "quran",
-        icon: <IconBook size={20} />,
+        id: "audio_quran",
+        name: t("audio_quran"),
+        page: "quran-audio",
+        icon: <IconHeadphones size={20} />,
       },
       {
         id: "azkar",
@@ -219,8 +220,8 @@ function MacroSearch({ isOpen, onClose }) {
       );
 
       // If we're not already on the Quran page, navigate there
-      if (currentPage !== "quran" && !currentPage.startsWith("quran-")) {
-        setCurrentPage("quran");
+      if (currentPage !== "quran-audio" && !currentPage.startsWith("quran-audio")) {
+        setCurrentPage("quran-audio");
       } else {
         // If already on Quran page or reciter page, just set the highlight to work now
         localStorage.setItem("highlight", result.highlight);

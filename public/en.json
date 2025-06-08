@@ -23,6 +23,7 @@
   "azkar": "Azkar",
   "settings": "Settings",
   "quran": "Quran",
+  "audio_quran": "Listen to Quran",
   "select_reciter": "Select Reciter",
   "reciter": "Reciter",
   "favorite_reciters": "Favorite Reciters",
@@ -56,6 +57,7 @@
   "loading": "Loading ...",
   "next": "Next",
   "back": "Back",
+  "go_to_page": "Go to Page",
   "press_button_to_count": "Press the button or space bar to count",
   "theme": "Theme",
   "theme_description": "Choose the theme that suits you best",
@@ -182,5 +184,10 @@
   "update_ready_title": "Update Ready",
   "update_available_title": "Update Available",
   "open_app": "Open App",
-  "exit": "Exit"
+  "exit": "Exit",
+  "checking_for_updates": "Checking for updates...",
+  "app_up_to_date": "You are running the latest version",
+  "updates_disabled_dev": "Update checking is disabled in development mode",
+  "update_check_failed": "Failed to check for updates",
+  "update_error_message": "Failed to check for updates"
 }

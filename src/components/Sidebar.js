@@ -10,6 +10,8 @@ import {
   IconSettingsFilled,
   IconCalendar,
   IconCalendarFilled,
+  IconHeadphonesFilled,
+  IconHeadphones,
 } from "@tabler/icons-react";
 import AppIcon from "./AppIcon";
 
@@ -27,9 +29,18 @@ function Sidebar() {
         ),
     },
     {
+      name: "quran-audio",
+      icon:
+        currentPage.startsWith("quran-audio") ? (
+          <IconHeadphonesFilled size={24} />
+        ) : (
+          <IconHeadphones size={24} />
+        ),
+    },
+    {
       name: "quran",
       icon:
-        currentPage.includes("quran") ? (
+        currentPage === "quran" ? (
           <IconBookFilled size={24} />
         ) : (
           <IconBook size={24} />
@@ -75,7 +86,9 @@ function Sidebar() {
               >
               <button
               className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
-                currentPage.includes(name)
+                (name === "quran-audio" && currentPage.startsWith("quran-audio")) ||
+                (name === "quran" && currentPage === "quran") ||
+                (name !== "quran" && name !== "quran-audio" && currentPage.includes(name))
                     ? `bg-${window.api.getColor()}-500/20 text-${window.api.getColor()}-500`
                     : "bg-bg-color-3 text-text"
                 }`}
