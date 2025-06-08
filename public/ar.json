@@ -186,5 +186,10 @@
   "update_ready_title": "تحديث جاهز",
   "update_available_title": "تحديث متاح",
   "open_app": "فتح التطبيق",
-  "exit": "إغلاق التطبيق"
+  "exit": "إغلاق التطبيق",
+  "checking_for_updates": "جاري البحث عن التحديثات...",
+  "app_up_to_date": "أنت تستخدم أحدث إصدار",
+  "updates_disabled_dev": "البحث عن التحديثات معطل في وضع التطوير",
+  "update_check_failed": "فشل في البحث عن التحديثات",
+  "update_error_message": "فشل في البحث عن التحديثات"
 }

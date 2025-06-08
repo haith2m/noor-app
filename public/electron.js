@@ -137,13 +137,8 @@ function initAutoUpdater() {
     repo: "noor-app",
   });
 
-  // Check for updates immediately when app starts
-  autoUpdater.checkForUpdatesAndNotify();
-
-  // Check for updates every hour
-  setInterval(() => {
-    autoUpdater.checkForUpdatesAndNotify();
-  }, 60 * 60 * 1000);
+  // Don't check for updates automatically on startup
+  // Only check when user explicitly requests it
 
   // Auto updater events
   autoUpdater.on("checking-for-update", () => {
@@ -153,6 +148,14 @@ function initAutoUpdater() {
   autoUpdater.on("update-available", (info) => {
     console.log("Update available:", info);
     mainWindow.webContents.send("update-available");
+  });
+
+  autoUpdater.on("update-not-available", (info) => {
+    console.log("Update not available:", info);
+    mainWindow.webContents.send("update-check-result", {
+      type: "no-update",
+      message: i18next.t("app_up_to_date", "You are running the latest version")
+    });
   });
 
   autoUpdater.on("update-downloaded", (info) => {
@@ -173,6 +176,11 @@ function initAutoUpdater() {
 
   autoUpdater.on("error", (err) => {
     console.error("Error in auto-updater:", err);
+    mainWindow.webContents.send("update-check-result", {
+      type: "error",
+      error: err,
+      message: i18next.t("update_error_message", "Failed to check for updates")
+    });
   });
 }
 
@@ -330,7 +338,31 @@ ipcMain.on("restart-app", () => {
 });
 
 ipcMain.on("check-for-updates", () => {
-  if (!isDev) {
+  if (isDev) {
+    // In development mode, show a message that updates are not available
+    mainWindow.webContents.send("update-check-result", {
+      type: "dev-mode",
+      message: i18next.t("updates_disabled_dev", "Update checking is disabled in development mode")
+    });
+    console.log("Update checking is disabled in development mode");
+    return;
+  }
+  
+  try {
+    // Notify that we're checking for updates
+    mainWindow.webContents.send("update-check-result", {
+      type: "checking",
+      message: i18next.t("checking_for_updates", "Checking for updates...")
+    });
+    
     autoUpdater.checkForUpdatesAndNotify();
+    console.log("Checking for updates...");
+  } catch (error) {
+    console.error("Error checking for updates:", error);
+    mainWindow.webContents.send("update-check-result", {
+      type: "error",
+      error: error,
+      message: i18next.t("update_error_message", "Failed to check for updates")
+    });
   }
 });

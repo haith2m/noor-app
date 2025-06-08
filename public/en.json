@@ -184,5 +184,10 @@
   "update_ready_title": "Update Ready",
   "update_available_title": "Update Available",
   "open_app": "Open App",
-  "exit": "Exit"
+  "exit": "Exit",
+  "checking_for_updates": "Checking for updates...",
+  "app_up_to_date": "You are running the latest version",
+  "updates_disabled_dev": "Update checking is disabled in development mode",
+  "update_check_failed": "Failed to check for updates",
+  "update_error_message": "Failed to check for updates"
 }

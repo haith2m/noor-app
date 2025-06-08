@@ -75,7 +75,7 @@ contextBridge.exposeInMainWorld("api", {
   sendNotification: (prayer) => ipcRenderer.send("notification", prayer),
   reloadPage: () => window.location.reload(),
   receive: (channel, func) => {
-    const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded"];
+    const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result"];
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => func(...args));
     }
@@ -87,6 +87,12 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("get-resource-path", resourceName),
   checkForUpdates: () => ipcRenderer.send("check-for-updates"),
   restartAndUpdate: () => ipcRenderer.send("restart-app"),
+  removeListener: (channel, func) => {
+    const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result"];
+    if (validChannels.includes(channel)) {
+      ipcRenderer.removeListener(channel, func);
+    }
+  },
 });
 
 // Expose protected methods that allow the renderer process to use
@@ -108,10 +114,16 @@ contextBridge.exposeInMainWorld("electron", {
     }
   },
   receive: (channel, func) => {
-    const validChannels = ["isMaxmized", "reload-prayers", "play-adhan", "update-available", "update-downloaded"];
+    const validChannels = ["isMaxmized", "reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result"];
     if (validChannels.includes(channel)) {
       // Deliberately strip event as it includes `sender`
       ipcRenderer.on(channel, (event, ...args) => func(...args));
+    }
+  },
+  removeListener: (channel, func) => {
+    const validChannels = ["isMaxmized", "reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result"];
+    if (validChannels.includes(channel)) {
+      ipcRenderer.removeListener(channel, func);
     }
   },
 });
