@@ -87,7 +87,7 @@ function Azkar() {
 
   return (
     <div
-      className={`mx-auto py-8 fadeIn min-h-screen relative overflow-hidden`}
+      className={`mx-auto py-8 fadeIn relative overflow-hidden`}
     >
       {azkar.length > 0 && azkar[azkarPage].content !== "stop" ? (
         <>

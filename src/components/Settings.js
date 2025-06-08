@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePage } from "../PageContext";
 import Tooltip from "./Tooltip";
-import { IconBrandGithub, IconInfoCircle } from '@tabler/icons-react';
+import { IconBrandGithub, IconInfoCircle } from "@tabler/icons-react";
 
 const Settings = () => {
   const { t } = useTranslation();
@@ -10,6 +10,8 @@ const Settings = () => {
 
   const [updatedSettings, setUpdatedSettings] = useState(settings);
   const [settingsChanged, setSettingsChanged] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState(null);
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
 
   useEffect(() => {
     setSettingsChanged(
@@ -18,13 +20,30 @@ const Settings = () => {
   }, [settings, updatedSettings]);
 
   useEffect(() => {
+    // Listen for update check results
+    const handleUpdateResult = (result) => {
+      console.log("Received update result:", result);
+      setIsCheckingUpdates(false);
+      setUpdateStatus(result);
+
+      // Clear the status after 5 seconds
+      setTimeout(() => {
+        setUpdateStatus(null);
+      }, 5000);
+    };
+
+    // Set up the event listener
+    window.api.receive("update-check-result", handleUpdateResult);
+
     // Check if there's a setting to highlight from search
-    const highlightedSetting = localStorage.getItem('highlight');
+    const highlightedSetting = localStorage.getItem("highlight");
     if (highlightedSetting) {
       // Scroll to the highlighted setting
-      const settingElement = document.getElementById(`setting-${highlightedSetting}`);
+      const settingElement = document.getElementById(
+        `setting-${highlightedSetting}`
+      );
       if (settingElement) {
-        settingElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        settingElement.scrollIntoView({ behavior: "smooth", block: "center" });
         // Add a temporary highlight class
         settingElement.classList.add(`bg-${window.api.getColor()}-500/20`);
         setTimeout(() => {
@@ -32,8 +51,16 @@ const Settings = () => {
         }, 2000);
       }
       // Clear the highlight after using it
-      localStorage.removeItem('highlight');
+      localStorage.removeItem("highlight");
     }
+
+    // Cleanup function
+    return () => {
+      // Remove the event listener if possible
+      if (window.api.removeListener) {
+        window.api.removeListener("update-check-result");
+      }
+    };
   }, []);
 
   const handleChange = (key, value) => {
@@ -48,6 +75,30 @@ const Settings = () => {
   const discardChanges = () => {
     setUpdatedSettings(settings);
     setSettingsChanged(false);
+  };
+
+  const handleCheckUpdates = () => {
+    setIsCheckingUpdates(true);
+    setUpdateStatus(null);
+    window.api.checkForUpdates();
+  };
+
+  const getUpdateStatusMessage = () => {
+    if (!updateStatus) return null;
+    console.log(updateStatus);
+    
+    switch (updateStatus.type) {
+      case 'checking':
+        return { text: t('checking_for_updates', 'Checking for updates...'), color: 'blue' };
+      case 'no-update':
+        return { text: t('app_up_to_date', 'You are running the latest version'), color: 'green' };
+      case 'dev-mode':
+        return { text: t('updates_disabled_dev', 'Update checking is disabled in development mode'), color: 'yellow' };
+      case 'error':
+        return { text: t('update_check_failed', 'Failed to check for updates'), color: 'red' };
+      default:
+        return null;
+    }
   };
 
   const methods = [
@@ -73,7 +124,10 @@ const Settings = () => {
         {t("settings")}
       </h1>
       <div className="grid grid-cols-2 gap-8">
-        <div id="setting-theme" className={`flex flex-col p-2 rounded-md transition-colors`}>
+        <div
+          id="setting-theme"
+          className={`flex flex-col p-2 rounded-md transition-colors`}
+        >
           <h2 className={`text-lg font-medium text-start`}>{t("theme")}</h2>
           <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
             {t("theme_description")}
@@ -102,7 +156,10 @@ const Settings = () => {
           </div>
         </div>
 
-        <div id="setting-color" className={`flex flex-col p-2 rounded-md transition-colors`}>
+        <div
+          id="setting-color"
+          className={`flex flex-col p-2 rounded-md transition-colors`}
+        >
           <h2 className={`text-lg font-medium text-start`}>{t("color")}</h2>
           <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
             {t("color_description")}
@@ -161,7 +218,10 @@ const Settings = () => {
           </div>
         </div>
 
-        <div id="setting-language" className={`flex flex-col p-2 rounded-md transition-colors`}>
+        <div
+          id="setting-language"
+          className={`flex flex-col p-2 rounded-md transition-colors`}
+        >
           <h2 className={`text-lg font-medium text-start`}>{t("language")}</h2>
           <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
             {t("language_description")}
@@ -192,7 +252,10 @@ const Settings = () => {
           </div>
         </div>
 
-        <div id="setting-calculationMethod" className={`flex flex-col p-2 rounded-md transition-colors`}>
+        <div
+          id="setting-calculationMethod"
+          className={`flex flex-col p-2 rounded-md transition-colors`}
+        >
           <h2 className={`text-lg font-medium text-start`}>
             {t("calculation_method")}
           </h2>
@@ -216,7 +279,10 @@ const Settings = () => {
           </div>
         </div>
 
-        <div id="setting-adhan_notifications" className={`flex flex-col p-2 rounded-md transition-colors`}>
+        <div
+          id="setting-adhan_notifications"
+          className={`flex flex-col p-2 rounded-md transition-colors`}
+        >
           <h2 className={`text-lg font-medium text-start`}>
             {t("adhan_notifications")}
           </h2>
@@ -246,7 +312,10 @@ const Settings = () => {
           </div>
         </div>
 
-        <div id="setting-minimize_to_tray" className={`flex flex-col p-2 rounded-md transition-colors`}>
+        <div
+          id="setting-minimize_to_tray"
+          className={`flex flex-col p-2 rounded-md transition-colors`}
+        >
           <h2 className={`text-lg font-medium text-start`}>
             {t("minimize_to_tray")}
           </h2>
@@ -308,19 +377,21 @@ const Settings = () => {
       <div className="p-4 mt-4 bg-bg-color-2 rounded-lg shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <IconInfoCircle size={20} />
-          <h2 className="text-lg font-medium">{t('app_information')}</h2>
+          <h2 className="text-lg font-medium">{t("app_information")}</h2>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-text-2">{t('version')}</p>
+            <p className="text-sm text-text-2">{t("version")}</p>
             <p className="font-medium">{window.api.getAppVersion()}</p>
           </div>
-          
+
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-text-2">{t('repository')}</p>
+            <p className="text-sm text-text-2">{t("repository")}</p>
             <button
-              onClick={() => window.api.openURL('https://github.com/haith2m/noor-app')}
+              onClick={() =>
+                window.api.openURL("https://github.com/haith2m/noor-app")
+              }
               className="flex items-center justify-center gap-2 text-primary text-center hover:text-primary/80"
             >
               <IconBrandGithub size={20} />
@@ -329,23 +400,42 @@ const Settings = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-text-2">{t('license')}</p>
+            <p className="text-sm text-text-2">{t("license")}</p>
             <p className="font-medium">MIT License</p>
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-text-2">{t('electron_version')}</p>
+            <p className="text-sm text-text-2">{t("electron_version")}</p>
             <p className="font-medium">{window.api.getElectronVersion()}</p>
           </div>
         </div>
-        
+
         <div className="mt-4 border-t border-bg-color-3 pt-4">
           <button
-            onClick={() => window.api.checkForUpdates()}
-            className={`flex items-center justify-center w-full md:w-auto bg-${window.api.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${window.api.getColor()}-600 transition-colors`}
+            onClick={handleCheckUpdates}
+            disabled={isCheckingUpdates}
+            className={`flex items-center justify-center w-full md:w-auto bg-${window.api.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${window.api.getColor()}-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            {t('check_for_updates')}
+            {isCheckingUpdates ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                {t('checking_for_updates', 'Checking for updates...')}
+              </>
+            ) : (
+              t('check_for_updates')
+            )}
           </button>
+          
+          {/* Status message */}
+          {updateStatus && (() => {
+            const statusMsg = getUpdateStatusMessage();
+            return statusMsg ? (
+              <div className={`mt-2 text-sm text-${statusMsg.color}-500 flex items-center`}>
+                <IconInfoCircle size={16} className="mr-1" />
+                {statusMsg.text}
+              </div>
+            ) : null;
+          })()}
         </div>
       </div>
     </div>

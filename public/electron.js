@@ -161,6 +161,14 @@ function initAutoUpdater() {
     });
   });
 
+  autoUpdater.on("update-not-available", (info) => {
+    console.log("Update not available:", info);
+    mainWindow.webContents.send("update-check-result", {
+      type: "no-update",
+      message: i18next.t("app_up_to_date", "You are running the latest version")
+    });
+  });
+
   autoUpdater.on("update-downloaded", (info) => {
     console.log("Update downloaded:", info);
     // Notify the user that update is ready
@@ -179,6 +187,7 @@ function initAutoUpdater() {
 
   autoUpdater.on("error", (err) => {
     console.error("Error in auto-updater:", err);
+    
     mainWindow?.webContents.send("update-check-result", {
       type: "error",
       error: err,

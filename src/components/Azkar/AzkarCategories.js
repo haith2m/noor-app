@@ -40,7 +40,7 @@ function Azkar() {
   if (categories.length === 0) return <Loading />;
 
   return (
-    <div className={`mx-auto py-8 fadeIn min-h-screen relative overflow-hidden`}>
+    <div className={`mx-auto py-8 fadeIn relative overflow-hidden`}>
       {category ? (
         <Azkar />
       ) : (
