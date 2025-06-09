@@ -1,7 +1,10 @@
 {
   "name": "noor",
   "description": "Islamic desktop app with prayer times, Azkar, Quran audio, and Hijri calendar.",
-  "author": "Haitham Almaymouni",
+  "author": {
+    "name": "Haitham Almaymouni",
+    "email": "haitham.almaymouni@outlook.com"
+  },
   "version": "0.2.0",
   "main": "public/electron.js",
   "homepage": "./",
@@ -24,6 +27,25 @@
         "nsis"
       ],
       "icon": "public/app.ico"
+    },
+    "linux": {
+      "target": [
+        "rpm",
+        "deb",
+        "AppImage",
+        "snap"
+      ],
+      "icon": "public/app.png",
+      "category": "Utility"
+    },
+    "snap": {
+      "grade": "stable",
+      "confinement": "strict"
+    },
+    "flatpak": {
+      "runtime": "org.freedesktop.Platform",
+      "runtimeVersion": "21.08",
+      "sdk": "org.freedesktop.Sdk"
     },
     "nsis": {
       "oneClick": false,

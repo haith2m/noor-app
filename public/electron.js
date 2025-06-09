@@ -34,12 +34,15 @@ i18next.init({
 let mainWindow;
 let tray = null;
 
+function getIcon(filename,extension) {
+  const ext = extension || (process.platform === "linux" ? "png" : "ico");
+  const devPath = path.join(__dirname, "../public", `${filename}.${ext}`);
+  const prodPath = path.join(__dirname, "../build", `${filename}.${ext}`);
+  return isDev ? devPath : prodPath;
+}
+
 function createTray() {
-  const iconPath = path.join(
-    __dirname,
-    isDev ? "../public/app.ico" : "../build/app.ico"
-  );
-  tray = new Tray(iconPath);
+  tray = new Tray(getIcon("icon","png"));
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -89,7 +92,7 @@ function createMainWindow() {
     minWidth: 920,
     autoHideMenuBar: true,
     frame: false,
-    icon: path.join(__dirname, "../public/app.ico"),
+    icon: getIcon("app"),
     webPreferences: {
       devTools: true,
       preload: path.join(__dirname, "preload.js"),
@@ -147,7 +150,15 @@ function initAutoUpdater() {
 
   autoUpdater.on("update-available", (info) => {
     console.log("Update available:", info);
-    mainWindow.webContents.send("update-available");
+    mainWindow?.webContents.send("update-available");
+  });
+
+  autoUpdater.on("update-not-available", (info) => {
+    console.log("Update not available:", info);
+    mainWindow?.webContents.send("update-check-result", {
+      type: "no-update",
+      message: i18next.t("app_up_to_date", "You are running the latest version")
+    });
   });
 
   autoUpdater.on("update-not-available", (info) => {
@@ -167,16 +178,17 @@ function initAutoUpdater() {
         "update_ready_message",
         "A new version has been downloaded. Restart the application to apply the updates."
       ),
-      icon: getResourcePath("app.ico"),
+      icon: getIcon("app"),
     });
     notification.show();
 
-    mainWindow.webContents.send("update-downloaded");
+    mainWindow?.webContents.send("update-downloaded");
   });
 
   autoUpdater.on("error", (err) => {
     console.error("Error in auto-updater:", err);
-    mainWindow.webContents.send("update-check-result", {
+    
+    mainWindow?.webContents.send("update-check-result", {
       type: "error",
       error: err,
       message: i18next.t("update_error_message", "Failed to check for updates")
@@ -214,7 +226,7 @@ function sendPrayerNotification(prayer) {
     const notification = new Notification({
       title: i18next.t("notification_title"),
       body: i18next.t("notification_body", { prayer: i18next.t(prayer) }),
-      icon: getResourcePath("app.ico"),
+      icon: getIcon("app"),
       urgency: "critical",
       timeoutType: "never",
       silent: true,
@@ -302,7 +314,7 @@ app.on("window-all-closed", () => {
 });
 
 app.on("activate", () => {
-  if (mainWindow === null) createMainWindow();
+  if (!mainWindow) createMainWindow();
 });
 
 // Set app.isQuitting flag when quitting
