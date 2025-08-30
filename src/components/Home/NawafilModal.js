@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { compatibleAPI } from "../../utils/webCompatibility";
 
 const NawafilModal = ({ prayersData, t }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -10,7 +11,7 @@ const NawafilModal = ({ prayersData, t }) => {
   return (
     <div>
       <h1
-        className={`font-medium cursor-pointer hover:underline text-${window.api.getColor()}-500`}
+        className={`font-medium cursor-pointer hover:underline text-${compatibleAPI.getColor()}-500`}
         onClick={toggleModal}
       >
         {t("nawafil")}
@@ -23,7 +24,7 @@ const NawafilModal = ({ prayersData, t }) => {
             <h2 className="text-lg font-medium mb-4">{t("nawafil")}</h2>
             <table className="w-full text-center">
               <thead>
-                <tr className={`border-b border-bg-color-3 w-full text-${window.api.getColor()}-500`}>
+                <tr className={`border-b border-bg-color-3 w-full text-${compatibleAPI.getColor()}-500`}>
                   <th className="py-2 w-1/3">{t("prayer")}</th>
                   <th className="py-2 w-1/3">{t("before")}</th>
                   <th className="py-2 w-1/3">{t("after")}</th>
@@ -48,7 +49,7 @@ const NawafilModal = ({ prayersData, t }) => {
             </table>
             <button
               onClick={toggleModal}
-              className={`mt-4 px-4 py-2 bg-bg-color-3 rounded hover:bg-gray-300 dark:hover:bg-bg-color-2 transition-all text-${window.api.getColor()}-500`}
+              className={`mt-4 px-4 py-2 bg-bg-color-3 rounded hover:bg-gray-300 dark:hover:bg-bg-color-2 transition-all text-${compatibleAPI.getColor()}-500`}
             >
               {t("close")}
             </button>

@@ -12,6 +12,7 @@ import {
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import Tooltip from "../Tooltip";
+import { compatibleAPI } from "../../utils/webCompatibility";
 
 function AudioPlayer({
   audioUrl,
@@ -160,7 +161,7 @@ function AudioPlayer({
             <button
               onClick={() => toggleControls("autoplay")}
               className={`text-sm ${
-                autoplay ? `text-${window.api.getColor()}-500` : "text-text-2"
+                autoplay ? `text-${compatibleAPI.getColor()}-500` : "text-text-2"
               }`}
               aria-label={t("autoplay")}
             >
@@ -181,7 +182,7 @@ function AudioPlayer({
             <button
               onClick={() => toggleControls("repeat")}
               className={`text-sm ${
-                repeat ? `text-${window.api.getColor()}-500` : "text-text-2"
+                repeat ? `text-${compatibleAPI.getColor()}-500` : "text-text-2"
               }`}
               aria-label={t("repeat")}
             >

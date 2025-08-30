@@ -8,6 +8,7 @@ import {
   IconRotateClockwise,
 } from "@tabler/icons-react";
 import NawafilModal from "./NawafilModal";
+import { compatibleAPI } from "../../utils/webCompatibility";
 
 function Times({ prayersData }) {
   const { t } = useTranslation();
@@ -83,7 +84,7 @@ function Times({ prayersData }) {
                 key={prayer}
                 className={`flex flex-row items-start justify-between relative p-2 bg-bg-color-2 ${
                   prayersData.nextPrayer === prayer
-                    ? `col-span-2 bg-${window.api.getColor()}-500/25 border border-${window.api.getColor()}-500`
+                    ? `col-span-2 bg-${compatibleAPI.getColor()}-500/25 border border-${compatibleAPI.getColor()}-500`
                     : "border border-bg-color-3"
                 } rounded-lg`}
               >
@@ -95,7 +96,7 @@ function Times({ prayersData }) {
                     <h1
                       className={`text-lg font-medium flex ${
                         prayersData.nextPrayer === prayer
-                          ? `text-${window.api.getColor()}-500`
+                          ? `text-${compatibleAPI.getColor()}-500`
                           : "text-text"
                       }`}
                     >
@@ -117,7 +118,7 @@ function Times({ prayersData }) {
                       className={`text-base font-medium text-text text-start flex gap-2 items-center p-4`}
                     >
                       {t("after")}{" "}
-                      <span className={`text-${window.api.getColor()}-500`}>
+                      <span className={`text-${compatibleAPI.getColor()}-500`}>
                         {remainingTimes[prayer]}
                       </span>
                     </p>
@@ -132,7 +133,7 @@ function Times({ prayersData }) {
             {t(randomZikr.category)}
           </h1>
           <p
-            className={`text-xl font-medium text-${window.api.getColor()}-500 p-4 naskh-font`}
+            className={`text-xl font-medium text-${compatibleAPI.getColor()}-500 p-4 naskh-font`}
           >
             {randomZikr.content.replace(/\\n/g, "\n").replace(/['",]/g, "")}
           </p>

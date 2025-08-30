@@ -6,27 +6,28 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
+import { compatibleAPI, isElectron } from "../utils/webCompatibility";
 
 function TitleBar({ onOpenSearch }) {
   const { t } = useTranslation();
   const handleClose = () => {
-    window.api.close();
+    compatibleAPI.close();
   };
 
   const handleMinimize = () => {
-    window.api.minimize();
+    compatibleAPI.minimize();
   };
 
   const handleMaximize = () => {
-    window.api.maximize();
+    compatibleAPI.maximize();
   };
 
   const isMaxmized = () => {
-    return window.api.isMaxmized();
+    return compatibleAPI.isMaxmized();
   };
 
   const handleDoubleClick = () => {
-    window.api.maximize();
+    compatibleAPI.maximize();
   };
 
   return (
@@ -56,37 +57,39 @@ function TitleBar({ onOpenSearch }) {
         </button>
       </div>
 
-      <div className="flex items-center h-full">
-        {/* Minimize Button */}
-        <button
-          onClick={handleMinimize}
-          className="flex items-center justify-center w-10 h-10 text-text hover:bg-black/10 transition-colors"
-          title="Minimize"
-          style={{ WebkitAppRegion: 'no-drag' }}
-        >
-          <IconMinus size={24} />
-        </button>
+      {isElectron() && (
+        <div className="flex items-center h-full">
+          {/* Minimize Button */}
+          <button
+            onClick={handleMinimize}
+            className="flex items-center justify-center w-10 h-10 text-text hover:bg-black/10 transition-colors"
+            title="Minimize"
+            style={{ WebkitAppRegion: 'no-drag' }}
+          >
+            <IconMinus size={24} />
+          </button>
 
-        {/* Maximize Button */}
-        <button
-          onClick={handleMaximize}
-          className="flex items-center justify-center w-10 h-10 text-text hover:bg-black/10 transition-colors"
-          title="Maximize"
-          style={{ WebkitAppRegion: 'no-drag' }}
-        >
-          {isMaxmized() ? <IconSquare size={16} /> : <IconCopy size={16} />}
-        </button>
+          {/* Maximize Button */}
+          <button
+            onClick={handleMaximize}
+            className="flex items-center justify-center w-10 h-10 text-text hover:bg-black/10 transition-colors"
+            title="Maximize"
+            style={{ WebkitAppRegion: 'no-drag' }}
+          >
+            {isMaxmized() ? <IconSquare size={16} /> : <IconCopy size={16} />}
+          </button>
 
-        {/* Close Button */}
-        <button
-          onClick={handleClose}
-          className="flex items-center justify-center w-10 h-10 text-text hover:bg-red-500 hover:text-white transition-colors"
-          title="Close"
-          style={{ WebkitAppRegion: 'no-drag' }}
-        >
-          <IconX size={24} />
-        </button>
-      </div>
+          {/* Close Button */}
+          <button
+            onClick={handleClose}
+            className="flex items-center justify-center w-10 h-10 text-text hover:bg-red-500 hover:text-white transition-colors"
+            title="Close"
+            style={{ WebkitAppRegion: 'no-drag' }}
+          >
+            <IconX size={24} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

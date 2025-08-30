@@ -13,6 +13,7 @@ import {
   IconHeadphones,
 } from "@tabler/icons-react";
 import AzkarIcon from "./AzkarIcon";
+import { compatibleAPI } from "../utils/webCompatibility";
 
 function MacroSearch({ isOpen, onClose }) {
   const { t, i18n } = useTranslation();
@@ -27,7 +28,7 @@ function MacroSearch({ isOpen, onClose }) {
   const resultsRef = useRef(null);
 
   useEffect(() => {
-    const language = window.api.getSettings().language || "ar";
+    const language = compatibleAPI.getSettings().language || "ar";
 
     // Load reciters
     fetch(`${process.env.PUBLIC_URL}/reciters-${language}.json`)
@@ -56,7 +57,7 @@ function MacroSearch({ isOpen, onClose }) {
     // Load azkar categories
     const fetchAzkar = async () => {
       try {
-        const azkarPath = await window.api.getResourcePath("azkar.json");
+        const azkarPath = await compatibleAPI.getResourcePath("azkar.json");
         const response = await fetch(azkarPath);
         const data = await response.json();
         setAzkarCategories(data);
@@ -281,14 +282,14 @@ function MacroSearch({ isOpen, onClose }) {
                 key={`${result.type}-${result.id}`}
                 className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-bg-color-3 transition-colors ${
                   index === selectedIndex
-                    ? `bg-${window.api.getColor()}-500/10`
+                    ? `bg-${compatibleAPI.getColor()}-500/10`
                     : ""
                 }`}
                 onClick={() => handleResultClick(result)}
                 onMouseEnter={() => setSelectedIndex(index)}
                 onMouseLeave={() => setSelectedIndex(-1)}
               >
-                <div className={`text-${window.api.getColor()}-500`}>
+                <div className={`text-${compatibleAPI.getColor()}-500`}>
                   {result.icon}
                 </div>
                 <div className="flex-1 text-start">
@@ -301,12 +302,12 @@ function MacroSearch({ isOpen, onClose }) {
                 {i18n.language === "ar" ? (
                   <IconChevronLeft
                     size={24}
-                    className={`text-${window.api.getColor()}-500`}
+                    className={`text-${compatibleAPI.getColor()}-500`}
                   />
                 ) : (
                   <IconChevronRight
                     size={24}
-                    className={`text-${window.api.getColor()}-500`}
+                    className={`text-${compatibleAPI.getColor()}-500`}
                   />
                 )}
               </div>

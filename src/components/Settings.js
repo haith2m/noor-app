@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { usePage } from "../PageContext";
 import Tooltip from "./Tooltip";
 import { IconBrandGithub, IconInfoCircle } from "@tabler/icons-react";
+import { compatibleAPI } from "../utils/webCompatibility";
 
 const Settings = () => {
   const { t } = useTranslation();
@@ -33,7 +34,7 @@ const Settings = () => {
     };
 
     // Set up the event listener
-    window.api.receive("update-check-result", handleUpdateResult);
+    compatibleAPI.receive("update-check-result", handleUpdateResult);
 
     // Check if there's a setting to highlight from search
     const highlightedSetting = localStorage.getItem("highlight");
@@ -45,9 +46,9 @@ const Settings = () => {
       if (settingElement) {
         settingElement.scrollIntoView({ behavior: "smooth", block: "center" });
         // Add a temporary highlight class
-        settingElement.classList.add(`bg-${window.api.getColor()}-500/20`);
+        settingElement.classList.add(`bg-${compatibleAPI.getColor()}-500/20`);
         setTimeout(() => {
-          settingElement.classList.remove(`bg-${window.api.getColor()}-500/20`);
+          settingElement.classList.remove(`bg-${compatibleAPI.getColor()}-500/20`);
         }, 2000);
       }
       // Clear the highlight after using it
@@ -57,8 +58,8 @@ const Settings = () => {
     // Cleanup function
     return () => {
       // Remove the event listener if possible
-      if (window.api.removeListener) {
-        window.api.removeListener("update-check-result");
+      if (compatibleAPI.removeListener) {
+        compatibleAPI.removeListener("update-check-result");
       }
     };
   }, []);
@@ -80,7 +81,7 @@ const Settings = () => {
   const handleCheckUpdates = () => {
     setIsCheckingUpdates(true);
     setUpdateStatus(null);
-    window.api.checkForUpdates();
+    compatibleAPI.checkForUpdates();
   };
 
   const getUpdateStatusMessage = () => {
@@ -137,7 +138,7 @@ const Settings = () => {
               <button
                 className={`w-8 h-8 rounded-full border-2 ${
                   updatedSettings.theme === "light"
-                    ? `border-${window.api.getColor()}-500`
+                    ? `border-${compatibleAPI.getColor()}-500`
                     : "border-zinc-500"
                 } bg-white`}
                 onClick={() => handleChange("theme", "light")}
@@ -147,7 +148,7 @@ const Settings = () => {
               <button
                 className={`w-8 h-8 rounded-full border-2 ${
                   updatedSettings.theme === "dark"
-                    ? `border-${window.api.getColor()}-500`
+                    ? `border-${compatibleAPI.getColor()}-500`
                     : "border-zinc-500"
                 } bg-black`}
                 onClick={() => handleChange("theme", "dark")}
@@ -169,7 +170,7 @@ const Settings = () => {
               <button
                 className={`w-8 h-8 rounded-full border-2 ${
                   updatedSettings.color === "green"
-                    ? `border-${window.api.getColor()}-500`
+                    ? `border-${compatibleAPI.getColor()}-500`
                     : "border-zinc-500"
                 } bg-green-500`}
                 onClick={() => handleChange("color", "green")}
@@ -179,7 +180,7 @@ const Settings = () => {
               <button
                 className={`w-8 h-8 rounded-full border-2 ${
                   updatedSettings.color === "blue"
-                    ? `border-${window.api.getColor()}-500`
+                    ? `border-${compatibleAPI.getColor()}-500`
                     : "border-zinc-500"
                 } bg-blue-500`}
                 onClick={() => handleChange("color", "blue")}
@@ -189,7 +190,7 @@ const Settings = () => {
               <button
                 className={`w-8 h-8 rounded-full border-2 ${
                   updatedSettings.color === "red"
-                    ? `border-${window.api.getColor()}-500`
+                    ? `border-${compatibleAPI.getColor()}-500`
                     : "border-zinc-500"
                 } bg-red-500`}
                 onClick={() => handleChange("color", "red")}
@@ -199,7 +200,7 @@ const Settings = () => {
               <button
                 className={`w-8 h-8 rounded-full border-2 ${
                   updatedSettings.color === "yellow"
-                    ? `border-${window.api.getColor()}-500`
+                    ? `border-${compatibleAPI.getColor()}-500`
                     : "border-zinc-500"
                 } bg-yellow-500`}
                 onClick={() => handleChange("color", "yellow")}
@@ -209,7 +210,7 @@ const Settings = () => {
               <button
                 className={`w-8 h-8 rounded-full border-2 ${
                   updatedSettings.color === "purple"
-                    ? `border-${window.api.getColor()}-500`
+                    ? `border-${compatibleAPI.getColor()}-500`
                     : "border-zinc-500"
                 } bg-purple-500`}
                 onClick={() => handleChange("color", "purple")}
@@ -230,7 +231,7 @@ const Settings = () => {
             <button
               className={`rounded-lg border-2 bg-primary-500 ${
                 updatedSettings.language === "en"
-                  ? `border-${window.api.getColor()}-500`
+                  ? `border-${compatibleAPI.getColor()}-500`
                   : "border-zinc-500"
               } p-2 flex items-center gap-2`}
               onClick={() => handleChange("language", "en")}
@@ -241,7 +242,7 @@ const Settings = () => {
             <button
               className={`rounded-lg border-2 bg-primary-500 ${
                 updatedSettings.language === "ar"
-                  ? `border-${window.api.getColor()}-500`
+                  ? `border-${compatibleAPI.getColor()}-500`
                   : "border-zinc-500"
               } p-2 flex items-center gap-2`}
               onClick={() => handleChange("language", "ar")}
@@ -299,7 +300,7 @@ const Settings = () => {
               }
               className={`w-16 h-8 transition-all ${
                 updatedSettings.adhan_notifications
-                  ? `bg-${window.api.getColor()}-500 border-${window.api.getColor()}-500`
+                  ? `bg-${compatibleAPI.getColor()}-500 border-${compatibleAPI.getColor()}-500`
                   : "bg-bg-color-2 border-zinc-500"
               } rounded-full border-2 flex items-center justify-center relative`}
             >
@@ -332,7 +333,7 @@ const Settings = () => {
               }
               className={`w-16 h-8 transition-all ${
                 updatedSettings.minimize_to_tray
-                  ? `bg-${window.api.getColor()}-500 border-${window.api.getColor()}-500`
+                  ? `bg-${compatibleAPI.getColor()}-500 border-${compatibleAPI.getColor()}-500`
                   : "bg-bg-color-2 border-zinc-500"
               } rounded-full border-2 flex items-center justify-center relative`}
             >
@@ -346,7 +347,7 @@ const Settings = () => {
         </div>
 
         <div
-          className={`flex flex-row justify-between items-center gap-4 p-4 bg-${window.api.getColor()}-500/25 backdrop-blur-lg text-text fixed start-20 bottom-4 rounded-lg w-[calc(100%-6rem)] ${
+          className={`flex flex-row justify-between items-center gap-4 p-4 bg-${compatibleAPI.getColor()}-500/25 backdrop-blur-lg text-text fixed start-20 bottom-4 rounded-lg w-[calc(100%-6rem)] ${
             settingsChanged ? "slideUp" : "slideDown"
           }`}
         >
@@ -383,14 +384,14 @@ const Settings = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
             <p className="text-sm text-text-2">{t("version")}</p>
-            <p className="font-medium">{window.api.getAppVersion()}</p>
+            <p className="font-medium">{compatibleAPI.getAppVersion()}</p>
           </div>
 
           <div className="flex flex-col gap-2">
             <p className="text-sm text-text-2">{t("repository")}</p>
             <button
               onClick={() =>
-                window.api.openURL("https://github.com/haith2m/noor-app")
+                compatibleAPI.openURL("https://github.com/haith2m/noor-app")
               }
               className="flex items-center justify-center gap-2 text-primary text-center hover:text-primary/80"
             >
@@ -406,7 +407,7 @@ const Settings = () => {
 
           <div className="flex flex-col gap-2">
             <p className="text-sm text-text-2">{t("electron_version")}</p>
-            <p className="font-medium">{window.api.getElectronVersion()}</p>
+            <p className="font-medium">{compatibleAPI.getElectronVersion()}</p>
           </div>
         </div>
 
@@ -414,7 +415,7 @@ const Settings = () => {
           <button
             onClick={handleCheckUpdates}
             disabled={isCheckingUpdates}
-            className={`flex items-center justify-center w-full md:w-auto bg-${window.api.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${window.api.getColor()}-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`flex items-center justify-center w-full md:w-auto bg-${compatibleAPI.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${compatibleAPI.getColor()}-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isCheckingUpdates ? (
               <>

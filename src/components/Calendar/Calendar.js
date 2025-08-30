@@ -3,6 +3,7 @@ import moment from 'moment';
 import momentHijri from 'moment-hijri';
 import { useTranslation } from 'react-i18next';
 import { IconChevronRight, IconChevronLeft, IconCalendar } from '@tabler/icons-react';
+import { compatibleAPI } from "../../utils/webCompatibility";
 
 const Calendar = () => {
   const { t } = useTranslation();
@@ -179,7 +180,7 @@ const Calendar = () => {
               key={index}
               className={`p-2 text-start transition-all border-b border-bg-color-3 flex flex-col justify-start ${
                 day && day.isSame(moment(), 'day')
-                  ? `bg-${window.api.getColor()}-500/25 text-${window.api.getColor()}-500`
+                  ? `bg-${compatibleAPI.getColor()}-500/25 text-${compatibleAPI.getColor()}-500`
                   : 'hover:bg-bg-color-2'
               }`}
             >

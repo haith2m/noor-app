@@ -4,6 +4,7 @@ import {
 } from "@tabler/icons-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { compatibleAPI } from "../../utils/webCompatibility";
 
 function SurahCard({ surah, color, onSelect, currentSurah, isPlaying, id }) {
   const { t } = useTranslation();
@@ -33,7 +34,7 @@ function SurahCard({ surah, color, onSelect, currentSurah, isPlaying, id }) {
         </h1>
       </div>
       <button
-        className={`size-10 rounded-full bg-${window.api.getColor()}-500/25 text-${window.api.getColor()}-500 flex items-center justify-center shrink-0`}
+        className={`size-10 rounded-full bg-${compatibleAPI.getColor()}-500/25 text-${compatibleAPI.getColor()}-500 flex items-center justify-center shrink-0`}
         onClick={(e) => {
           e.stopPropagation();
           onSelect();

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import Loading from "../Loading";
 import { usePage } from "../../PageContext";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { compatibleAPI } from "../../utils/webCompatibility";
 
 function Azkar() {
   const { t, i18n } = useTranslation();
@@ -21,7 +22,7 @@ function Azkar() {
   
   useEffect(() => {
     const fetchPath = async () => {
-      const path = await window.api.getResourcePath("azkar.json");
+      const path = await compatibleAPI.getResourcePath("azkar.json");
       setAzkarPath(path);
     };
 
@@ -92,7 +93,7 @@ function Azkar() {
       {azkar.length > 0 && azkar[azkarPage].content !== "stop" ? (
         <>
           <button
-            className={`flex flex-row w-fit items-center gap-2 mt-4 me-auto px-4 relative z-50 text-${window.api.getColor()}-500`}
+            className={`flex flex-row w-fit items-center gap-2 mt-4 me-auto px-4 relative z-50 text-${compatibleAPI.getColor()}-500`}
             onClick={() => setCurrentPage("azkar")}
           >
             <IconChevronRight />
@@ -106,7 +107,7 @@ function Azkar() {
             </h1>
             <div className={`flex flex-col gap-2 py-6`}>
               <h1
-                className={`text-2xl text-${window.api.getColor()}-500 naskh-font`}
+                className={`text-2xl text-${compatibleAPI.getColor()}-500 naskh-font`}
               >
                 {azkar[azkarPage].content
                   ? azkar[azkarPage].content
@@ -134,7 +135,7 @@ function Azkar() {
                 onClick={handleBack}
               >
                 <h1
-                  className={`text-base font-medium flex items-center text-${window.api.getColor()}-500`}
+                  className={`text-base font-medium flex items-center text-${compatibleAPI.getColor()}-500`}
                 >
                   {i18n.language === "ar" ? (
                     <IconChevronRight />
@@ -148,7 +149,7 @@ function Azkar() {
                 className={`flex flex-col items-center justify-center gap-4`}
               >
                 <button
-                  className={`w-14 h-14 m-2 rounded-full p-4 bg-${window.api.getColor()}-500/25 border-2 border-${window.api.getColor()}-500 text-${window.api.getColor()}-500 flex items-center text-2xl justify-center active:scale-90 transition-all ${
+                  className={`w-14 h-14 m-2 rounded-full p-4 bg-${compatibleAPI.getColor()}-500/25 border-2 border-${compatibleAPI.getColor()}-500 text-${compatibleAPI.getColor()}-500 flex items-center text-2xl justify-center active:scale-90 transition-all ${
                     buttonDisabled.count ? "disabled" : ""
                   }`}
                   onClick={handleCount}
@@ -163,7 +164,7 @@ function Azkar() {
                 onClick={handleNext}
               >
                 <h1
-                  className={`text-base font-medium flex items-center text-${window.api.getColor()}-500`}
+                  className={`text-base font-medium flex items-center text-${compatibleAPI.getColor()}-500`}
                 >
                   {t("next")}
                   {i18n.language === "ar" ? (
