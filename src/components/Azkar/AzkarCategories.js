@@ -4,6 +4,7 @@ import Loading from "../Loading";
 import { usePage } from "../../PageContext";
 import i18n from "../../i18n";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { compatibleAPI } from "../../utils/webCompatibility";
 
 function Azkar() {
   const { t } = useTranslation();
@@ -13,7 +14,7 @@ function Azkar() {
 
   useEffect(() => {
     const fetchPath = async () => {
-      const path = await window.api.getResourcePath("azkar.json");
+      const path = await compatibleAPI.getResourcePath("azkar.json");
       setAzkarPath(path);
     };
     
@@ -59,9 +60,9 @@ function Azkar() {
                   {t(category)}
                 </h1>
                 {i18n.language === "ar" ? (
-                  <IconChevronLeft size={24} className={`text-${window.api.getColor()}-500`} />
+                  <IconChevronLeft size={24} className={`text-${compatibleAPI.getColor()}-500`} />
                 ) : (
-                  <IconChevronRight size={24} className={`text-${window.api.getColor()}-500`} />
+                  <IconChevronRight size={24} className={`text-${compatibleAPI.getColor()}-500`} />
                 )}
               </button>
             ))}

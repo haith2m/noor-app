@@ -10,6 +10,7 @@ import SearchBar from "./SearchBar";
 import { usePage } from "../../PageContext";
 import AudioPlayer from "./AudioPlayer";
 import MoshafSelector from "./MoshafSelector";
+import { compatibleAPI } from "../../utils/webCompatibility";
 import {
   IconBookmarkFilled,
   IconChevronLeft,
@@ -48,7 +49,7 @@ function AudioQuran({ Reciter }) {
   const { currentPage, setCurrentPage } = usePage();
 
   useEffect(() => {
-    const language = window.api.getSettings().language === "ar" ? "ar" : "en";
+    const language = compatibleAPI.getSettings().language === "ar" ? "ar" : "en";
 
     fetch(`${process.env.PUBLIC_URL}/suwar-${language}.json`)
       .then((res) => res.json())
@@ -79,11 +80,11 @@ function AudioQuran({ Reciter }) {
                 });
                 // Add a temporary highlight class
                 surahElement.classList.add(
-                  `bg-${window.api.getColor()}-500/20`
+                  `bg-${compatibleAPI.getColor()}-500/20`
                 );
                 setTimeout(() => {
                   surahElement.classList.remove(
-                    `bg-${window.api.getColor()}-500/20`
+                    `bg-${compatibleAPI.getColor()}-500/20`
                   );
                 }, 2000);
               }
@@ -116,7 +117,7 @@ function AudioQuran({ Reciter }) {
               }
             }
           }
-          const favoriteIds = window.api.getFavorites();
+          const favoriteIds = compatibleAPI.getFavorites();
           setFavorites(new Set(favoriteIds));
         },
         (error) => {
@@ -171,7 +172,7 @@ function AudioQuran({ Reciter }) {
   };
 
   const handleToggleFavorite = (reciterId) => {
-    window.api.toggleFavorite(reciterId);
+    compatibleAPI.toggleFavorite(reciterId);
 
     setFavorites((prevFavorites) => {
       const newFavorites = new Set(prevFavorites);
@@ -241,7 +242,7 @@ function AudioQuran({ Reciter }) {
     ? displayedReciters.length
     : 11 + favorites.size;
 
-  const getColor = () => window.api.getColor();
+  const getColor = () => compatibleAPI.getColor();
 
   function pad(n, width, z = "0") {
     n = n + "";
@@ -309,11 +310,11 @@ function AudioQuran({ Reciter }) {
                       block: "center",
                     });
                     surahElement.classList.add(
-                      `bg-${window.api.getColor()}-500/20`
+                      `bg-${compatibleAPI.getColor()}-500/20`
                     );
                     setTimeout(() => {
                       surahElement.classList.remove(
-                        `bg-${window.api.getColor()}-500/20`
+                        `bg-${compatibleAPI.getColor()}-500/20`
                       );
                     }, 2000);
                   }
@@ -361,10 +362,10 @@ function AudioQuran({ Reciter }) {
               block: "center",
             });
             // Add a temporary highlight class
-            surahElement.classList.add(`bg-${window.api.getColor()}-500/20`);
+            surahElement.classList.add(`bg-${compatibleAPI.getColor()}-500/20`);
             setTimeout(() => {
               surahElement.classList.remove(
-                `bg-${window.api.getColor()}-500/20`
+                `bg-${compatibleAPI.getColor()}-500/20`
               );
             }, 2000);
           }
@@ -399,7 +400,7 @@ function AudioQuran({ Reciter }) {
       <div className="flex flex-col items-start justify-center pb-4 px-2 gap-4">
         {currentPage !== "quran-audio" && (
           <button
-            className={`flex flex-row w-fit items-center gap-2 mt-4 me-auto px-4 relative z-50 text-${window.api.getColor()}-500`}
+            className={`flex flex-row w-fit items-center gap-2 mt-4 me-auto px-4 relative z-50 text-${compatibleAPI.getColor()}-500`}
             onClick={() => setCurrentPage("quran-audio")}
           >
             {i18n.language === "ar" ? (
@@ -493,7 +494,7 @@ function AudioQuran({ Reciter }) {
                   </div>
                   <button
                     onClick={scrollToTop}
-                    className={`fixed bottom-4 right-20 bg-${window.api.getColor()}-900 border border-${window.api.getColor()}-600 text-${window.api.getColor()}-500 p-1 rounded-full shadow-lg transition-all z-50 ${
+                    className={`fixed bottom-4 right-20 bg-${compatibleAPI.getColor()}-900 border border-${compatibleAPI.getColor()}-600 text-${compatibleAPI.getColor()}-500 p-1 rounded-full shadow-lg transition-all z-50 ${
                       showScrollTop ? "opacity-100" : "opacity-0"
                     }`}
                   >
@@ -566,7 +567,7 @@ function AudioQuran({ Reciter }) {
               )}
               <button
                 onClick={scrollToTop}
-                className={`fixed bottom-4 right-20 bg-${window.api.getColor()}-900 border border-${window.api.getColor()}-600 text-${window.api.getColor()}-500 p-1 rounded-full shadow-lg transition-all z-50 ${
+                className={`fixed bottom-4 right-20 bg-${compatibleAPI.getColor()}-900 border border-${compatibleAPI.getColor()}-600 text-${compatibleAPI.getColor()}-500 p-1 rounded-full shadow-lg transition-all z-50 ${
                   showScrollTop ? "opacity-100" : "opacity-0"
                 }`}
               >

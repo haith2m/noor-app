@@ -1,6 +1,7 @@
 import colors from "tailwindcss/colors";
 import { ReadingView } from "react-quran";
 import { useEffect } from "react";
+import { compatibleAPI } from "../../utils/webCompatibility";
 function QuranPage({ page, position }) {
   useEffect(() => {
     if (!page) return; // Early return if no page
@@ -11,7 +12,7 @@ function QuranPage({ page, position }) {
       content.forEach((content) => {
         content.querySelectorAll("span").forEach((span) => {
           if (arabicNumbers.some((num) => span.textContent.includes(num))) {
-            span.style.color = colors[window.api.getColor()][500];
+            span.style.color = colors[compatibleAPI.getColor()][500];
           }
         });
       });
@@ -26,7 +27,7 @@ function QuranPage({ page, position }) {
     height: "500px",
     maxWidth: "100%",
     backgroundColor: "transparent",
-    color: window.api.getSettings().theme === "light" ? "black" : "white",
+    color: compatibleAPI.getSettings().theme === "light" ? "black" : "white",
     margin: "0",
     paddingTop: "12px",
     paddingBottom: "12px",
@@ -38,7 +39,7 @@ function QuranPage({ page, position }) {
     <div className="flex-1 max-w-[400px] relative" dir="rtl">
       {/* Top Frame */}
       <div
-        className={`qFrameTop bg-${window.api.getColor()}-500`}
+        className={`qFrameTop bg-${compatibleAPI.getColor()}-500`}
         style={{
           backgroundImage: "url('./dark-frame.png')",
           backgroundBlendMode: "multiply",
@@ -48,7 +49,7 @@ function QuranPage({ page, position }) {
 
       {/* right Frame */}
       <div
-        className={`qFrameRight bg-${window.api.getColor()}-500`}
+        className={`qFrameRight bg-${compatibleAPI.getColor()}-500`}
         style={{
           backgroundImage: "url('./dark-frame.png')",
           backgroundBlendMode: "multiply",
@@ -60,7 +61,7 @@ function QuranPage({ page, position }) {
         }}
       ></div>
       <div
-        className={`qFrameLeft bg-${window.api.getColor()}-500`}
+        className={`qFrameLeft bg-${compatibleAPI.getColor()}-500`}
         style={{
           backgroundImage: "url('./dark-frame.png')",
           backgroundBlendMode: "multiply",
@@ -77,7 +78,7 @@ function QuranPage({ page, position }) {
           page={page}
           readingViewStyles={readingViewStyles}
           surahTitleStyles={{
-            backgroundColor: colors[window.api.getColor()][600] + "80",
+            backgroundColor: colors[compatibleAPI.getColor()][600] + "80",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
             border: "none",
@@ -85,7 +86,7 @@ function QuranPage({ page, position }) {
             width: "calc(100% + 19px)",
             marginRight: "-9px",
             borderWidth: "1px",
-            borderColor: colors[window.api.getColor()][600],
+            borderColor: colors[compatibleAPI.getColor()][600],
             borderStyle: "solid",
           }}
           fixedAspectRatio={true}
@@ -93,7 +94,7 @@ function QuranPage({ page, position }) {
       </div>
       {/* Bottom Frame */}
       <div
-        className={`qFrameBottom bg-${window.api.getColor()}-500`}
+        className={`qFrameBottom bg-${compatibleAPI.getColor()}-500`}
         style={{
           backgroundImage: "url('./dark-frame.png')",
           backgroundBlendMode: "multiply",

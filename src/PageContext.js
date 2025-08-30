@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { compatibleAPI } from "./utils/webCompatibility";
 
 const PageContext = createContext();
 
@@ -10,12 +11,12 @@ export const PageProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    setSettings(window.api.getSettings());
-    setCurrentPage(window.api.getPage());
+    setSettings(compatibleAPI.getSettings());
+    setCurrentPage(compatibleAPI.getPage());
   }, []);
 
   const editSettings = (newSettings) => {
-    window.api.setSettings(newSettings);
+    compatibleAPI.setSettings(newSettings);
   };
 
   return (

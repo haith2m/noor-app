@@ -1,7 +1,8 @@
 import colors from "tailwindcss/colors";
+import { compatibleAPI } from "../utils/webCompatibility";
 
 function AppIcon() {
-  const color = colors[window.api.getColor()][500];
+  const color = colors[compatibleAPI.getColor()][500];
   return (
     <svg
       version="1.2"

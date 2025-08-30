@@ -1,4 +1,5 @@
 import React from "react";
+import { compatibleAPI } from "../utils/webCompatibility";
 
 function Loading() {
   return (
@@ -6,7 +7,7 @@ function Loading() {
       <div role="status">
         <svg
           aria-hidden="true"
-          className={`w-8 h-8 text-bg-color-3 animate-spin fill-${window.api.getColor()}-600`}
+          className={`w-8 h-8 text-bg-color-3 animate-spin fill-${compatibleAPI.getColor()}-600`}
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

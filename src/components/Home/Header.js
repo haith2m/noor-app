@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import moment from "moment";
 import { IconLocationFilled } from "@tabler/icons-react";
+import { compatibleAPI } from "../../utils/webCompatibility";
 
 function formatDate(date, language) {
   const months = {
@@ -51,9 +52,9 @@ function Header({ ipData, prayersData }) {
   );
 
   return (
-    <div className={`mx-auto p-4 relative z-0 bg-${window.api.getColor()}-500 bg-image fadeIn`}>
+    <div className={`mx-auto p-4 relative z-0 bg-${compatibleAPI.getColor()}-500 bg-image fadeIn`}>
       <div className={`flex flex-row items-center justify-center m-auto gap-1 mb-4`}>
-        <IconLocationFilled size={16} stroke={1.5} className={`text-${window.api.getColor()}-700`} />
+        <IconLocationFilled size={16} stroke={1.5} className={`text-${compatibleAPI.getColor()}-700`} />
         <h1 className={`text-xl font-medium text-white select-none`}>{ipData.name}</h1>
       </div>
       <div className={`w-[calc(100%-1rem)] rounded-3xl flex flex-row max-md:flex-col max-md:items-center justify-between relative z-0`}>

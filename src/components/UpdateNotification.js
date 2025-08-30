@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IconCloudDownload, IconRefresh, IconX } from '@tabler/icons-react';
+import { compatibleAPI } from "../utils/webCompatibility";
 
 function UpdateNotification() {
   const { t } = useTranslation();
@@ -9,11 +10,11 @@ function UpdateNotification() {
 
   useEffect(() => {
     // Listen for update events from main process
-    window.api.receive('update-available', () => {
+    compatibleAPI.receive('update-available', () => {
       setShowNotification(true);
     });
 
-    window.api.receive('update-downloaded', () => {
+    compatibleAPI.receive('update-downloaded', () => {
       setUpdateDownloaded(true);
       setShowNotification(true);
     });
@@ -24,11 +25,11 @@ function UpdateNotification() {
   };
 
   const handleRestart = () => {
-    window.api.restartAndUpdate();
+    compatibleAPI.restartAndUpdate();
   };
 
   const handleCheck = () => {
-    window.api.checkForUpdates();
+    compatibleAPI.checkForUpdates();
   };
 
   if (!showNotification) return null;
@@ -37,7 +38,7 @@ function UpdateNotification() {
     <div className="fixed bottom-4 left-4 z-50 w-80 bg-bg-color-2 border border-bg-color-3 rounded-lg shadow-lg overflow-hidden">
       <div className="flex items-center justify-between p-3 border-b border-bg-color-3">
         <div className="flex items-center">
-          <IconCloudDownload className={`text-${window.api.getColor()}-500 mr-2`} />
+          <IconCloudDownload className={`text-${compatibleAPI.getColor()}-500 mr-2`} />
           <span className="font-medium text-text">
             {updateDownloaded ? t('update_ready', 'Update Ready') : t('update_available', 'Update Available')}
           </span>
@@ -58,7 +59,7 @@ function UpdateNotification() {
         {updateDownloaded ? (
           <button
             onClick={handleRestart}
-            className={`flex items-center justify-center w-full bg-${window.api.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${window.api.getColor()}-600 transition-colors`}
+            className={`flex items-center justify-center w-full bg-${compatibleAPI.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${compatibleAPI.getColor()}-600 transition-colors`}
           >
             <IconRefresh size={18} className="mr-2" />
             {t('restart_now', 'Restart Now')}
@@ -66,7 +67,7 @@ function UpdateNotification() {
         ) : (
           <button
             onClick={handleCheck}
-            className={`flex items-center justify-center w-full bg-${window.api.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${window.api.getColor()}-600 transition-colors`}
+            className={`flex items-center justify-center w-full bg-${compatibleAPI.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${compatibleAPI.getColor()}-600 transition-colors`}
           >
             <IconCloudDownload size={18} className="mr-2" />
             {t('check_for_updates', 'Check for Updates')}

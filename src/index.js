@@ -7,10 +7,11 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "./i18n";
 import Loading from "./components/Loading";
 import colors from "tailwindcss/colors";
-const theme = window.api.getSettings().theme;
+import { compatibleAPI } from "./utils/webCompatibility";
+const theme = compatibleAPI.getSettings().theme;
 
 document.body.className = theme === "light" ? "light" : "dark";
-document.body.style.setProperty("--color", colors[window.api.getColor()][500]);
+document.body.style.setProperty("--color", colors[compatibleAPI.getColor()][500]);
 
 ReactDOM.render(
   <Suspense fallback={<Loading />}>

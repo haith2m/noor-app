@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { isElectron } from '../utils/webCompatibility';
 
 const SoundPlayer = () => {
   const audioRef = useRef(null);
@@ -8,8 +9,10 @@ const SoundPlayer = () => {
     const audio = new Audio();
     audioRef.current = audio;
 
-    // Add event listener for play-sound events from main process
-    window.electron.receive('play-adhan', (data) => {
+    // Only set up IPC listener in Electron environment
+    if (isElectron() && window.electron) {
+      // Add event listener for play-sound events from main process
+      window.electron.receive('play-adhan', (data) => {
       try {
         if (data) {
           console.log('Playing sound:', data);
@@ -36,7 +39,8 @@ const SoundPlayer = () => {
       } catch (error) {
         console.error('Error handling play-adhan event:', error);
       }
-    });
+      });
+    }
 
     // Cleanup
     return () => {

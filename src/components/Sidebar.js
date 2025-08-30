@@ -14,6 +14,7 @@ import {
   IconHeadphones,
 } from "@tabler/icons-react";
 import AppIcon from "./AppIcon";
+import { compatibleAPI } from "../utils/webCompatibility";
 
 function Sidebar() {
   const { currentPage, setCurrentPage } = usePage();
@@ -68,7 +69,7 @@ function Sidebar() {
   ];
 
   useEffect(() => {
-    window.api.setPage(currentPage);
+    compatibleAPI.setPage(currentPage);
   }, [currentPage]);
 
   return (
@@ -89,7 +90,7 @@ function Sidebar() {
                 (name === "quran-audio" && currentPage.startsWith("quran-audio")) ||
                 (name === "quran" && currentPage === "quran") ||
                 (name !== "quran" && name !== "quran-audio" && currentPage.includes(name))
-                    ? `bg-${window.api.getColor()}-500/20 text-${window.api.getColor()}-500`
+                    ? `bg-${compatibleAPI.getColor()}-500/20 text-${compatibleAPI.getColor()}-500`
                     : "bg-bg-color-3 text-text"
                 }`}
                 onClick={() => setCurrentPage(name)}
@@ -104,7 +105,7 @@ function Sidebar() {
       <button
         className={`w-12 h-12 rounded-lg flex items-center justify-center ${
           currentPage === "settings"
-            ? `bg-${window.api.getColor()}-400/15 text-${window.api.getColor()}-500`
+            ? `bg-${compatibleAPI.getColor()}-400/15 text-${compatibleAPI.getColor()}-500`
             : "bg-bg-color-3 text-text"
         }`}
         onClick={() => setCurrentPage("settings")}
