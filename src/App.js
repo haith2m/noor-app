@@ -26,6 +26,7 @@ import {
 } from "@tabler/icons-react";
 import AudioQuran from "./components/AudioQuran/AudioQuran";
 import Quran from "./components/Quran/Quran";
+import { compatibleAPI, isElectron } from "./utils/webCompatibility";
 
 function MainApp() {
   const [data, setData] = useState(null);
@@ -68,7 +69,7 @@ function MainApp() {
         icon: (
           <IconSunrise
             size={24}
-            className={`text-${window.api.getColor()}-500`}
+            className={`text-${compatibleAPI.getColor()}-500`}
           />
         ),
       },
@@ -79,7 +80,7 @@ function MainApp() {
           after: 2,
         },
         icon: (
-          <IconSun size={24} className={`text-${window.api.getColor()}-500`} />
+          <IconSun size={24} className={`text-${compatibleAPI.getColor()}-500`} />
         ),
       },
       asr: {
@@ -91,7 +92,7 @@ function MainApp() {
         icon: (
           <IconCloud
             size={24}
-            className={`text-${window.api.getColor()}-500`}
+            className={`text-${compatibleAPI.getColor()}-500`}
           />
         ),
       },
@@ -104,7 +105,7 @@ function MainApp() {
         icon: (
           <IconSunset
             size={24}
-            className={`text-${window.api.getColor()}-500`}
+            className={`text-${compatibleAPI.getColor()}-500`}
           />
         ),
       },
@@ -115,7 +116,7 @@ function MainApp() {
           after: 2,
         },
         icon: (
-          <IconMoon size={24} className={`text-${window.api.getColor()}-500`} />
+          <IconMoon size={24} className={`text-${compatibleAPI.getColor()}-500`} />
         ),
       },
     };
@@ -131,7 +132,7 @@ function MainApp() {
   useEffect(() => {
     const fetchLocationData = async () => {
       try {
-        const locationData = await window.api.getLocationData();
+        const locationData = await compatibleAPI.getLocationData();
         setData(locationData);
       } catch (error) {
         console.error("Error fetching location data:", error);
@@ -165,12 +166,12 @@ function MainApp() {
   }, [data, settings]);
 
   useEffect(() => {
-    window.api.receive("reload-prayers", () => {
+    compatibleAPI.receive("reload-prayers", () => {
       setPrayers(calculatePrayerTimes());
     });
 
     return () => {
-      window.api.removeListener("reload-prayers");
+      compatibleAPI.removeListener("reload-prayers");
     };
   }, []);
 
@@ -246,7 +247,7 @@ function App() {
     <PageProvider>
       <MainApp />
       <SoundPlayer />
-      <UpdateNotification />
+      {isElectron() && <UpdateNotification />}
     </PageProvider>
   );
 }
