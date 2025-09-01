@@ -28,6 +28,20 @@
       ],
       "icon": "public/app.ico"
     },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64",
+            "universal"
+          ]
+        }
+      ],
+      "icon": "public/app.icns"
+    },
     "linux": {
       "target": [
         "rpm",
@@ -87,7 +101,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "babel-preset-react-app": "^10.1.0",
     "electron": "^31.0.1",
-    "electron-builder": "^22.14.13"
+    "electron-builder": "^26.0.12"
   },
   "scripts": {
     "react-start": "react-scripts start",
@@ -99,6 +113,7 @@
     "publish": "electron-builder --publish always",
     "build": "npm run react-build && npm run electron-build",
     "build:linux": "npm run react-build && electron-builder --linux",
+    "build:macos": "npm run react-build && electron-builder --mac --universal",
     "start": "concurrently \"cross-env BROWSER=none npm run react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "release-version": "node release-version.js"
   },
