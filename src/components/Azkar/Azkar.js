@@ -44,8 +44,7 @@ function Azkar() {
       );
   }, [currentPage, azkarPath]);
 
-  document.addEventListener("keydown", (e) => {
-    // on space handle count
+  document.addEventListener("keyup", (e) => {
     if (e.code === "Space") {
       handleCount();
     }
