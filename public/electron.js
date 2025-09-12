@@ -315,6 +315,12 @@ cron.schedule("* * * * *", async () => {
 
 // Electron app event handlers
 app.on("ready", () => {
+if (process.platform === 'linux') {
+  // Enable wayland for linux
+  app.commandLine.appendSwitch('enable-features', 'UseOzonePlatform');
+  app.commandLine.appendSwitch('ozone-platform', 'wayland');
+  app.commandLine.appendSwitch('enable-wayland-ime');
+}
   createMainWindow();
 });
 
