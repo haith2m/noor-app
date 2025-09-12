@@ -15,8 +15,8 @@ import TitleBar from "./components/TitleBar";
 import AzkarCategories from "./components/Azkar/AzkarCategories";
 import Calendar from "./components/Calendar/Calendar";
 import SoundPlayer from "./components/SoundPlayer";
-import MacroSearch from "./components/MacroSearch";
 import UpdateNotification from "./components/UpdateNotification";
+import AudioPlayer from "./components/AudioQuran/AudioPlayer";
 import {
   IconCloud,
   IconMoon,
@@ -28,10 +28,10 @@ import AudioQuran from "./components/AudioQuran/AudioQuran";
 import Quran from "./components/Quran/Quran";
 
 function MainApp() {
+  const { t, i18n } = useTranslation();
+  const { currentPage, settings, audioState } = usePage();
   const [data, setData] = useState(null);
   const [prayers, setPrayers] = useState(null);
-  const { t, i18n } = useTranslation();
-  const { currentPage, settings } = usePage();
   const [searchOpen, setSearchOpen] = useState(false);
 
   const calculatePrayerTimes = () => {
@@ -206,11 +206,13 @@ function MainApp() {
         <Sidebar />
         <TitleBar onOpenSearch={() => setSearchOpen(true)} />
         <div
-          className={`w-[calc(100%-4rem)] ms-auto mt-10 transition-all duration-300`}
+          className={`w-[calc(100%-4rem)] ms-auto mt-10 transition-all duration-300 ${
+            audioState.audioUrl ? "pb-24" : ""
+          }`}
         >
           {currentPage === "home" && (
             <>
-              <Header ipData={data} prayersData={prayers} />
+              <Header location={data} prayersData={prayers} />
               <Home prayersData={prayers} />
             </>
           )}
@@ -226,12 +228,9 @@ function MainApp() {
           )}
           {currentPage === "quran" && <Quran />}
           {currentPage === "azkar" && <AzkarCategories />}
-          {currentPage === "settings" && <Settings />}
+          {currentPage.startsWith("settings") && <Settings />}
           {currentPage === "calendar" && <Calendar />}
         </div>
-
-        {/* Add the MacroSearch component */}
-        <MacroSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
       </>
     );
   };
@@ -247,6 +246,7 @@ function App() {
       <MainApp />
       <SoundPlayer />
       <UpdateNotification />
+      <AudioPlayer />
     </PageProvider>
   );
 }

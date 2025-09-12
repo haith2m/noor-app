@@ -5,10 +5,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Loading from "../Loading";
 import ReciterCard from "./ReciterCard";
-import SurahCard from "./SurahCard";
+import SurahCard from "../SurahCard";
 import SearchBar from "./SearchBar";
 import { usePage } from "../../PageContext";
-import AudioPlayer from "./AudioPlayer";
 import MoshafSelector from "./MoshafSelector";
 import {
   IconBookmarkFilled,
@@ -26,77 +25,63 @@ function AudioQuran({ Reciter }) {
   const [searchText, setSearchText] = useState("");
   const [suwar, setSuwar] = useState([]);
   const [showMoreReciters, setShowMoreReciters] = useState(false);
-  const [audioUrl, setAudioUrl] = useState(null);
-  const [currentSurah, setCurrentSurah] = useState("");
-  const [isPlaying, setIsPlaying] = useState(false);
   const [favorites, setFavorites] = useState(new Set());
   const [error, setError] = useState(null);
   const [selectedMoshaf, setSelectedMoshaf] = useState(null);
-  const [autoplay, setAutoplay] = useState(
-    localStorage.getItem("autoplay") === "true"
-  );
-  const [repeat, setRepeat] = useState(
-    localStorage.getItem("repeat") === "true"
-  );
   const [surahSearchText, setSurahSearchText] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
   const recitersListRef = useRef(null);
   const surahsListRef = useRef(null);
 
-  const audioRef = useRef(null);
-
-  const { currentPage, setCurrentPage } = usePage();
+  const {
+    currentPage,
+    setCurrentPage,
+    audioState,
+    playAudio,
+    togglePlayPause,
+    setSuwarList,
+    updateAudioState,
+  } = usePage();
 
   useEffect(() => {
-    const language = window.api.getSettings().language === "ar" ? "ar" : "en";
+    const fetchSuwar = async () => {
+      try {
+        const language = window.api.getSettings()?.language || "ar";
+        const response = await fetch(
+          `${process.env.PUBLIC_URL}/suwar-${language}.json`
+        );
+        const result = await response.json();
+        setSuwar(result.suwar);
+        setSuwarList(result.suwar);
+        console.log("Setting suwar list:", result.suwar.length, "surahs");
 
-    fetch(`${process.env.PUBLIC_URL}/suwar-${language}.json`)
-      .then((res) => res.json())
-      .then(
-        (result) => {
-          setSuwar(result.suwar);
+      } catch (error) {
+        console.error("Error fetching suwar:", error);
+        setError(t("error_occurred"));
+      }
+    };
 
-          // Check if there's a surah to highlight from search immediately
-          // For pages that already loaded with a reciter and moshaf
-          const highlightedSurahId = localStorage.getItem("highlight");
-          const shouldScrollToSurah = localStorage.getItem("scrollToSurah");
+    const checkOnlineStatus = async () => {
+      try {
+        const response = await fetch("https://www.cloudflare.com/cdn-cgi/trace", {
+          method: "HEAD",
+          cache: "no-store",
+        });
+        setIsOnline(response.ok);
+        return response.ok;
+      } catch (error) {
+        setIsOnline(false);
+        return false;
+      }
+    };
 
-          if (
-            reciter &&
-            selectedMoshaf &&
-            highlightedSurahId &&
-            shouldScrollToSurah
-          ) {
-            // We need to wait for the surah list to render
-            setTimeout(() => {
-              const surahElement = document.getElementById(
-                `surah-${highlightedSurahId}`
-              );
-              if (surahElement) {
-                surahElement.scrollIntoView({
-                  behavior: "smooth",
-                  block: "center",
-                });
-                // Add a temporary highlight class
-                surahElement.classList.add(
-                  `bg-${window.api.getColor()}-500/20`
-                );
-                setTimeout(() => {
-                  surahElement.classList.remove(
-                    `bg-${window.api.getColor()}-500/20`
-                  );
-                }, 2000);
-              }
-              // Clear the highlight after using it
-              localStorage.removeItem("highlight");
-              localStorage.removeItem("scrollToSurah");
-            }, 500);
-          }
-        },
-        (error) => {
-          setError(t("failed_to_load_suwar"));
-        }
-      );
+    checkOnlineStatus().then((isOnline) => {
+      if (isOnline) {
+        fetchSuwar();
+      }
+    });
+    const language = window.api.getSettings().language || "ar";
 
     fetch(`${process.env.PUBLIC_URL}/reciters-${language}.json`)
       .then((res) => res.json())
@@ -120,7 +105,7 @@ function AudioQuran({ Reciter }) {
           setFavorites(new Set(favoriteIds));
         },
         (error) => {
-          setError(t("failed_to_load_reciters"));
+          setError(t("error_occurred"));
         }
       );
   }, [t, Reciter]);
@@ -186,24 +171,26 @@ function AudioQuran({ Reciter }) {
 
   const handleSelectSurah = (surahId) => {
     const selectedSurah = suwar.find((s) => s.id === surahId);
-    if (currentSurah === selectedSurah.name && isPlaying) {
-      setIsPlaying(!isPlaying);
-      audioRef.current.pause();
+    if (audioState.surahName === selectedSurah.name && audioState.isPlaying) {
+      togglePlayPause();
     } else {
       if (selectedSurah && reciter && selectedMoshaf) {
         const url = `${selectedMoshaf.server}${pad(selectedSurah.id, 3)}.mp3`;
-        setAudioUrl(url);
-        setCurrentSurah(selectedSurah.name);
-        setIsPlaying(true);
-        audioRef.current?.play();
+        playAudio(
+          url,
+          selectedSurah.name,
+          reciter.name,
+          reciter.id,
+          selectedMoshaf
+        );
       }
     }
   };
 
   const handleSelectMoshaf = (moshaf) => {
     setSelectedMoshaf(moshaf);
-    setAudioUrl(null);
-    setCurrentSurah("");
+    // Update global state with selected moshaf
+    updateAudioState({ selectedMoshaf: moshaf });
   };
 
   const handleSelectReciter = (reciter) => {
@@ -212,27 +199,10 @@ function AudioQuran({ Reciter }) {
 
     if (reciter.moshaf.length > 1) {
       setSelectedMoshaf(null);
+      updateAudioState({ selectedMoshaf: null });
     } else if (reciter.moshaf.length === 1) {
       setSelectedMoshaf(reciter.moshaf[0]);
-    }
-  };
-
-  const handleOnEnded = () => {
-    if (repeat) {
-      audioRef.current.currentTime = 0;
-      setTimeout(() => {
-        audioRef.current.play();
-      }, 1000);
-    } else if (autoplay) {
-      const nextSurah =
-        suwar[suwar.findIndex((s) => s.name === currentSurah) + 1];
-      if (nextSurah) {
-        setAudioUrl(`${selectedMoshaf.server}${pad(nextSurah.id, 3)}.mp3`);
-        setCurrentSurah(nextSurah.name);
-      }
-    } else {
-      setIsPlaying(false);
-      audioRef.current?.pause();
+      updateAudioState({ selectedMoshaf: reciter.moshaf[0] });
     }
   };
 
@@ -255,7 +225,7 @@ function AudioQuran({ Reciter }) {
     });
   };
 
-  const filteredSurahs = suwar.filter((surah) => {
+  const filteredSurahs = (audioState.suwarList || suwar).filter((surah) => {
     if (!surahSearchText) return true;
 
     const normalizedSearchText = surahSearchText
@@ -270,131 +240,30 @@ function AudioQuran({ Reciter }) {
     );
   });
 
-  // Add this useEffect to handle persistent highlight for surah selection
-  useEffect(() => {
-    // When a reciter and moshaf are selected, check if we have a persistent highlight
-    if (reciter && selectedMoshaf) {
-      try {
-        const persistentHighlightStr = localStorage.getItem(
-          "persistentHighlight"
-        );
-        if (persistentHighlightStr) {
-          const persistentHighlight = JSON.parse(persistentHighlightStr);
-
-          // Check if it's still relevant (less than 5 minutes old)
-          const now = Date.now();
-          const timestamp = persistentHighlight.timestamp || 0;
-          const isRecent = now - timestamp < 5 * 60 * 1000; // 5 minutes
-
-          if (isRecent && persistentHighlight.type === "surah") {
-            const surahId = persistentHighlight.id;
-            const selectedSurah = suwar.find((s) => s.id == surahId);
-
-            if (selectedSurah) {
-              // Only proceed if this surah is available in the selected moshaf
-              const isSurahAvailable = reciter.moshaf
-                .find((m) => m.id === selectedMoshaf.id)
-                ?.surah_list.split(",")
-                .includes(surahId.toString());
-
-              if (isSurahAvailable) {
-                // Set up the highlight
-                setTimeout(() => {
-                  const surahElement = document.getElementById(
-                    `surah-${surahId}`
-                  );
-                  if (surahElement) {
-                    surahElement.scrollIntoView({
-                      behavior: "smooth",
-                      block: "center",
-                    });
-                    surahElement.classList.add(
-                      `bg-${window.api.getColor()}-500/20`
-                    );
-                    setTimeout(() => {
-                      surahElement.classList.remove(
-                        `bg-${window.api.getColor()}-500/20`
-                      );
-                    }, 2000);
-                  }
-
-                  // Clear the persistent highlight
-                  localStorage.removeItem("persistentHighlight");
-                }, 500);
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error processing persistent highlight:", error);
-        localStorage.removeItem("persistentHighlight");
-      }
-    }
-  }, [reciter, selectedMoshaf, suwar]);
-
   // Add this function to handle surah search specifically
   const handleSurahSearch = (e) => {
     const input = e.target.value.toLowerCase();
     setSurahSearchText(input);
   };
 
-  // Add a useEffect to handle scrollToSurah localStorage changes
   useEffect(() => {
-    const scrollToHighlightedSurah = () => {
-      const highlightedSurahId = localStorage.getItem("highlight");
-      const shouldScrollToSurah = localStorage.getItem("scrollToSurah");
-
-      if (
-        highlightedSurahId &&
-        shouldScrollToSurah &&
-        reciter &&
-        selectedMoshaf
-      ) {
-        // We need to wait for the surah list to render
-        setTimeout(() => {
-          const surahElement = document.getElementById(
-            `surah-${highlightedSurahId}`
-          );
-          if (surahElement) {
-            surahElement.scrollIntoView({
-              behavior: "smooth",
-              block: "center",
-            });
-            // Add a temporary highlight class
-            surahElement.classList.add(`bg-${window.api.getColor()}-500/20`);
-            setTimeout(() => {
-              surahElement.classList.remove(
-                `bg-${window.api.getColor()}-500/20`
-              );
-            }, 2000);
-          }
-          // Clear the highlight after using it
-          localStorage.removeItem("highlight");
-          localStorage.removeItem("scrollToSurah");
-        }, 500);
+    // Handle when a specific reciter is passed as parameter
+    if (Reciter && reciters.length > 0 && !reciter) {
+      const selectedReciter = reciters.find((r) => r.id.toString() === Reciter);
+      if (selectedReciter) {
+        setReciter(selectedReciter);
+        if (selectedReciter.moshaf.length === 1) {
+          setSelectedMoshaf(selectedReciter.moshaf[0]);
+          updateAudioState({ selectedMoshaf: selectedReciter.moshaf[0] });
+          console.log("Auto-selected moshaf:", selectedReciter.moshaf[0]);
+        }
       }
-    };
-
-    // Check on initial render and when reciter/moshaf changes
-    scrollToHighlightedSurah();
-
-    // Also listen for storage events which can be triggered by MacroSearch
-    const handleStorageEvent = () => {
-      scrollToHighlightedSurah();
-    };
-
-    window.addEventListener("storage", handleStorageEvent);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageEvent);
-    };
-  }, [reciter, selectedMoshaf]);
+    }
+  }, [Reciter, reciters, reciter, updateAudioState]);
 
   return (
     <div
-      className={`pt-8 bg-transparent text-text min-h-screen transition-all fadeIn ${
-        audioUrl ? "pb-24" : "pb-4"
-      }`}
+      className={`pt-8 bg-transparent text-text min-h-screen transition-all fadeIn`}
     >
       <div className="flex flex-col items-start justify-center pb-4 px-2 gap-4">
         {currentPage !== "quran-audio" && (
@@ -530,7 +399,7 @@ function AudioQuran({ Reciter }) {
                   onSearch={handleSurahSearch}
                 />
               </div>
-              {navigator.onLine ? (
+              {isOnline ? (
                 <div
                   ref={surahsListRef}
                   className={`grid grid-cols-3 max-md:grid-cols-2 max-sm:grid-cols-1 gap-4 m-auto justify-center mt-2 w-full`}
@@ -549,8 +418,8 @@ function AudioQuran({ Reciter }) {
                         surah={surah}
                         color={getColor()}
                         onSelect={() => handleSelectSurah(surah.id)}
-                        currentSurah={currentSurah}
-                        isPlaying={isPlaying}
+                        currentSurah={audioState.surahName}
+                        isPlaying={audioState.isPlaying}
                       />
                     ))}
                 </div>
@@ -575,27 +444,6 @@ function AudioQuran({ Reciter }) {
             </>
           )}
         </div>
-      )}
-
-      {audioUrl && (
-        <AudioPlayer
-          audioUrl={audioUrl}
-          surahName={currentSurah}
-          reciterName={reciter?.name}
-          reciterId={reciter?.id}
-          server={selectedMoshaf?.server}
-          surahId={
-            currentSurah ? suwar.find((s) => s.name === currentSurah)?.id : null
-          }
-          autoplay={autoplay}
-          setAutoplay={setAutoplay}
-          repeat={repeat}
-          setRepeat={setRepeat}
-          handleOnEnded={handleOnEnded}
-          audioElement={audioRef}
-          isPlaying={isPlaying}
-          setIsPlaying={setIsPlaying}
-        />
       )}
     </div>
   );

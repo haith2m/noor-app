@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import moment from "moment";
 import { IconLocationFilled } from "@tabler/icons-react";
+import { usePage } from "../../PageContext";
 
 function formatDate(date, language) {
   const months = {
@@ -43,18 +44,24 @@ function formatDate(date, language) {
     : `${dayOfMonth} ${month} ${year}`;
 }
 
-function Header({ ipData, prayersData }) {
+function Header({ location, prayersData }) {
   const { t, i18n } = useTranslation();
   const currentPrayerTime = moment(
     prayersData.times[prayersData.nextPrayer].time,
     "HH:mm"
   );
 
+  const { setCurrentPage } = usePage();
+
   return (
     <div className={`mx-auto p-4 relative z-0 bg-${window.api.getColor()}-500 bg-image fadeIn`}>
-      <div className={`flex flex-row items-center justify-center m-auto gap-1 mb-4`}>
+      <div onClick={() => {
+        setCurrentPage("settings-location");
+      }} className={`flex flex-row group relative items-center justify-center m-auto gap-1 mb-4 p-1 rounded-md w-fit hover:bg-black/10 cursor-pointer transition-all z-10`}>
         <IconLocationFilled size={16} stroke={1.5} className={`text-${window.api.getColor()}-700`} />
-        <h1 className={`text-xl font-medium text-white select-none`}>{ipData.name}</h1>
+        <h1 className={`text-xl font-medium text-white select-none`}>
+          {location.name}
+        </h1>
       </div>
       <div className={`w-[calc(100%-1rem)] rounded-3xl flex flex-row max-md:flex-col max-md:items-center justify-between relative z-0`}>
         <div className={`flex flex-col items-start text-white p-6`}>

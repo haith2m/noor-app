@@ -103,13 +103,13 @@ function Sidebar() {
       </div>
       <button
         className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-          currentPage === "settings"
+          currentPage.startsWith("settings")
             ? `bg-${window.api.getColor()}-400/15 text-${window.api.getColor()}-500`
             : "bg-bg-color-3 text-text"
         }`}
-        onClick={() => setCurrentPage("settings")}
+        onClick={() => setCurrentPage("settings-appearance")}
       >
-        {currentPage === "settings" ? (
+        {currentPage.startsWith("settings") ? (
           <IconSettingsFilled size={24} />
         ) : (
           <IconSettings size={24} />

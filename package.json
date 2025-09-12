@@ -5,7 +5,7 @@
     "name": "Haitham Almaymouni",
     "email": "haitham.almaymouni@outlook.com"
   },
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "public/electron.js",
   "homepage": "./",
   "repository": {
@@ -58,6 +58,7 @@
   "dependencies": {
     "@tabler/icons-react": "^3.19.0",
     "adhan": "^4.4.3",
+    "auto-launch": "^5.0.6",
     "concurrently": "^7.0.0",
     "cross-env": "^7.0.3",
     "electron-is-dev": "^2.0.0",
@@ -75,7 +76,6 @@
     "react-dom": "^17.0.2",
     "react-i18next": "^14.1.2",
     "react-icons": "^5.3.0",
-    "react-quran": "^1.2.5",
     "react-router": "^6.23.1",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.0",

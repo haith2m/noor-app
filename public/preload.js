@@ -66,6 +66,32 @@ contextBridge.exposeInMainWorld("api", {
       return null;
     }
   },
+  getCurrentStoredLocation: () => {
+    try {
+      return store.get("location") || null;
+    } catch (error) {
+      console.error("Error getting stored location:", error);
+      return null;
+    }
+  },
+  setLocationData: (locationData) => {
+    try {
+      store.set("location", locationData);
+      return true;
+    } catch (error) {
+      console.error("Error setting location data:", error);
+      return false;
+    }
+  },
+  clearLocationData: () => {
+    try {
+      store.delete("location");
+      return true;
+    } catch (error) {
+      console.error("Error clearing location data:", error);
+      return false;
+    }
+  },
   minimize: () => ipcRenderer.send("minimize"),
   maximize: () => ipcRenderer.send("maximize"),
   isMaxmized: () => ipcRenderer.on("isMaxmized", (event, arg) => arg),
@@ -87,6 +113,8 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("get-resource-path", resourceName),
   checkForUpdates: () => ipcRenderer.send("check-for-updates"),
   restartAndUpdate: () => ipcRenderer.send("restart-app"),
+  getAutoLaunchEnabled: () => ipcRenderer.invoke("get-auto-launch-enabled"),
+  setAutoLaunch: (enabled) => ipcRenderer.invoke("set-auto-launch", enabled),
   removeListener: (channel, func) => {
     const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result"];
     if (validChannels.includes(channel)) {

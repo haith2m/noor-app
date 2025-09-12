@@ -15,11 +15,18 @@ const i18next = require("i18next");
 const moment = require("moment");
 const cron = require("node-cron");
 const { autoUpdater } = require("electron-updater");
+const AutoLaunch = require("auto-launch");
 
 Store.initRenderer();
 const store = new Store();
 
 const settings = store.get("settings") || {};
+
+// Configure auto-launch
+const autoLauncher = new AutoLaunch({
+  name: 'Noor',
+  path: app.getPath('exe'),
+});
 
 i18next.init({
   lng: settings.language || "ar",
@@ -33,6 +40,8 @@ i18next.init({
 
 let mainWindow;
 let tray = null;
+
+app.disableHardwareAcceleration();
 
 function getIcon(filename,extension) {
   const ext = extension || (process.platform === "linux" ? "png" : "ico");
@@ -376,5 +385,29 @@ ipcMain.on("check-for-updates", () => {
       error: error,
       message: i18next.t("update_error_message", "Failed to check for updates")
     });
+  }
+});
+
+// Add IPC handlers for auto-launch functionality
+ipcMain.handle("get-auto-launch-enabled", async () => {
+  try {
+    return await autoLauncher.isEnabled();
+  } catch (error) {
+    console.error("Error checking auto-launch status:", error);
+    return false;
+  }
+});
+
+ipcMain.handle("set-auto-launch", async (event, enabled) => {
+  try {
+    if (enabled) {
+      await autoLauncher.enable();
+    } else {
+      await autoLauncher.disable();
+    }
+    return true;
+  } catch (error) {
+    console.error("Error setting auto-launch:", error);
+    return false;
   }
 });

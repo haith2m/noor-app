@@ -4,36 +4,47 @@ import { useTranslation } from "react-i18next";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import i18n from "../../i18n";
-import {
-  IconRotateClockwise,
-} from "@tabler/icons-react";
+import { IconRotateClockwise } from "@tabler/icons-react";
 import NawafilModal from "./NawafilModal";
 
 function Times({ prayersData }) {
   const { t } = useTranslation();
   const [remainingTimes, setRemainingTimes] = useState({});
   const [randomZikr, setRandomZikr] = useState(null);
+  const [azkarPath, setAzkarPath] = useState("");
+
+  useEffect(() => {
+    const fetchPath = async () => {
+      const path = await window.api.getResourcePath("azkar.json");
+      setAzkarPath(path);
+    };
+
+    fetchPath();
+  }, []);
 
   const getRandomZikr = async () => {
     try {
-      const response = await fetch(
-        "https://raw.githubusercontent.com/nawafalqari/azkar-api/56df51279ab6eb86dc2f6202c7de26c8948331c1/azkar.json"
-      );
-      const categories = await response.json();
-      const randomCategory =
-        Object.keys(categories)[
-          Math.floor(Math.random() * Object.keys(categories).length)
-        ];
-      const randomZikr =
-        categories[randomCategory][
-          Math.floor(Math.random() * categories[randomCategory].length)
-        ];
+      await fetch(`${azkarPath}`)
+        .then((res) => res.json())
+        .then((result) => {
+          const categories = result;
+          console.log(categories);
+          const randomCategory =
+            Object.keys(categories)[
+              Math.floor(Math.random() * Object.keys(categories).length)
+            ];
+          const randomZikr =
+            categories[randomCategory][
+              Math.floor(Math.random() * categories[randomCategory].length)
+            ];
+          console.log(randomZikr, randomCategory);
+          setRandomZikr(randomZikr);
 
-      if (randomZikr.content !== "stop") {
-        setRandomZikr(randomZikr);
-      } else {
-        getRandomZikr(); // Retry if the zikr is "stop"
-      }
+          return randomZikr;
+        })
+        .catch((error) => {
+          console.error("Error fetching random Zikr:", error);
+        });
     } catch (error) {
       console.error("Error fetching random Zikr:", error);
     }
@@ -63,7 +74,7 @@ function Times({ prayersData }) {
   useEffect(() => {
     getRandomZikr();
     // eslint-disable-next-line
-  }, []);
+  }, [azkarPath]);
 
   return (
     <div className={`pt-8 fadeIn h-fit bg-transparent `}>
@@ -127,7 +138,9 @@ function Times({ prayersData }) {
         </div>
       </div>
       {randomZikr && randomZikr.content && (
-        <div className={`bg-bg-color-2 border border-bg-color-3 rounded-lg p-4 m-4`}>
+        <div
+          className={`bg-bg-color-2 border border-bg-color-3 rounded-lg p-4 m-4`}
+        >
           <h1 className={`text-xl font-medium text-text px-4 text-start`}>
             {t(randomZikr.category)}
           </h1>

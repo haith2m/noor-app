@@ -2,9 +2,9 @@ import colors from "tailwindcss/colors";
 import { ReadingView } from "react-quran";
 import { useEffect } from "react";
 function QuranPage({ page, position }) {
+  const theme = window.api.getSettings().theme;
   useEffect(() => {
     if (!page) return; // Early return if no page
-
     const content = document.querySelectorAll(".quran-text");
     const arabicNumbers = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
     if (content) {
@@ -40,8 +40,8 @@ function QuranPage({ page, position }) {
       <div
         className={`qFrameTop bg-${window.api.getColor()}-500`}
         style={{
-          backgroundImage: "url('./dark-frame.png')",
-          backgroundBlendMode: "multiply",
+          backgroundImage: `url('./${theme !== "light" ? "dark-" : ""}frame.png')`,
+          backgroundBlendMode: theme !== "light" ? "multiply" : "screen",
           height: "23px",
         }}
       ></div>
@@ -50,8 +50,8 @@ function QuranPage({ page, position }) {
       <div
         className={`qFrameRight bg-${window.api.getColor()}-500`}
         style={{
-          backgroundImage: "url('./dark-frame.png')",
-          backgroundBlendMode: "multiply",
+          backgroundImage: `url('./${theme !== "light" ? "dark-" : ""}frame.png')`,
+          backgroundBlendMode: theme !== "light" ? "multiply" : "screen",
           backgroundRepeat: "repeat-y",
           width: "19px",
           height: "500px",
@@ -62,8 +62,8 @@ function QuranPage({ page, position }) {
       <div
         className={`qFrameLeft bg-${window.api.getColor()}-500`}
         style={{
-          backgroundImage: "url('./dark-frame.png')",
-          backgroundBlendMode: "multiply",
+          backgroundImage: `url('./${theme !== "light" ? "dark-" : ""}frame.png')`,
+          backgroundBlendMode: theme !== "light" ? "multiply" : "screen",
           backgroundRepeat: "repeat-y",
           width: "19px",
           height: "500px",
@@ -95,8 +95,8 @@ function QuranPage({ page, position }) {
       <div
         className={`qFrameBottom bg-${window.api.getColor()}-500`}
         style={{
-          backgroundImage: "url('./dark-frame.png')",
-          backgroundBlendMode: "multiply",
+          backgroundImage: `url('./${theme !== "light" ? "dark-" : ""}frame.png')`,
+          backgroundBlendMode: theme !== "light" ? "multiply" : "screen",
           backgroundPosition: "0 bottom",
           height: "23px",
         }}

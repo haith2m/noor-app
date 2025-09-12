@@ -8,94 +8,114 @@ import {
   IconRepeatOff,
   IconVolume,
   IconVolumeOff,
+  IconX,
 } from "@tabler/icons-react";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { usePage } from "../../PageContext";
 import Tooltip from "../Tooltip";
 
-function AudioPlayer({
-  audioUrl,
-  surahName,
-  reciterName,
-  reciterId,
-  setAutoplay,
-  autoplay,
-  setRepeat,
-  repeat,
-  handleOnEnded,
-  isPlaying,
-  setIsPlaying,
-  audioElement,
-}) {
+function AudioPlayer() {
   const { t, i18n } = useTranslation();
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(
-    parseFloat(localStorage.getItem("volume")) || 1
-  );
+  const { 
+    audioState, 
+    updateAudioState, 
+    togglePlayPause, 
+    handleAudioEnded,
+    closeAudioPlayer, 
+    audioRef 
+  } = usePage();
 
+  const {
+    audioUrl,
+    surahName,
+    reciterName,
+    isPlaying,
+    currentTime,
+    duration,
+    volume,
+    autoplay,
+    repeat,
+  } = audioState;
+
+  // Handle audio events
   useEffect(() => {
-    const audio = audioElement.current;
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    }
 
-    // Update the audio source
-    if (audio.src !== audioUrl) {
+    const audio = audioRef.current;
+
+    const handleLoadedMetadata = () => {
+      updateAudioState({ duration: audio.duration });
+    };
+
+    const handleTimeUpdate = () => {
+      updateAudioState({ currentTime: audio.currentTime });
+    };
+
+    const handlePlay = () => {
+      updateAudioState({ isPlaying: true });
+    };
+
+    const handlePause = () => {
+      updateAudioState({ isPlaying: false });
+    };
+
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("ended", handleAudioEnded);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("ended", handleAudioEnded);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  // Update audio source when audioUrl changes
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    const audio = audioRef.current;
+
+    if (audioUrl && audio.src !== audioUrl) {
       audio.src = audioUrl;
       audio.crossOrigin = "anonymous";
       audio.volume = volume;
       audio.load();
       
-      if (autoplay || isPlaying) {
-        audio
-          .play()
-          .catch((error) => console.error("Error playing audio:", error));
-        setIsPlaying(true);
+      // Only auto-play if this is a new audio source and isPlaying is true
+      if (isPlaying) {
+        audio.play().catch((error) => console.error("Error playing audio:", error));
       }
     }
 
     // Set Media Session Metadata
-    if ("mediaSession" in navigator) {
+    if ("mediaSession" in navigator && audioUrl) {
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: surahName || "Quran Surah",
         artist: reciterName || "Unknown Reciter",
       });
     }
-  }, [audioUrl, surahName, reciterName, autoplay, isPlaying]);
+  }, [audioUrl, surahName, reciterName, volume]);
 
-  // Handle audio events
+  // Handle play/pause state changes separately
   useEffect(() => {
-    const audio = audioElement.current;
+    if (!audioRef.current || !audioUrl) return;
 
-    const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
-    };
+    const audio = audioRef.current;
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime);
-    };
-
-    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("ended", handleOnEnded);
-
-    return () => {
-      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("ended", handleOnEnded);
-    };
-  }, [autoplay, repeat, handleOnEnded]);
-
-  // Play/Pause toggle
-  const togglePlayPause = useCallback(() => {
-    const audio = audioElement.current;
-    if (isPlaying) {
+    if (isPlaying && audio.paused) {
+      audio.play().catch((error) => console.error("Error playing audio:", error));
+    } else if (!isPlaying && !audio.paused) {
       audio.pause();
-    } else {
-      audio
-        .play()
-        .catch((error) => console.error("Error playing audio:", error));
     }
-    setIsPlaying(!isPlaying);
-  }, [isPlaying]);
+  }, [isPlaying, audioUrl]);
 
   // Format time in mm:ss
   const formatTime = (time) => {
@@ -111,15 +131,19 @@ function AudioPlayer({
   // Handle progress bar change
   const handleProgressChange = (e) => {
     const newTime = parseFloat(e.target.value);
-    audioElement.current.currentTime = newTime;
-    setCurrentTime(newTime);
+    if (audioRef.current) {
+      audioRef.current.currentTime = newTime;
+      updateAudioState({ currentTime: newTime });
+    }
   };
 
   // Handle volume change
   const handleVolumeChange = (e) => {
     const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    audioElement.current.volume = newVolume;
+    updateAudioState({ volume: newVolume });
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
     localStorage.setItem("volume", newVolume);
   };
 
@@ -132,67 +156,68 @@ function AudioPlayer({
   // Toggle controls for repeat and autoplay
   const toggleControls = (control) => {
     if (control === "repeat") {
-      setRepeat(!repeat);
-      setAutoplay(false);
-      localStorage.setItem("repeat", !repeat);
+      const newRepeat = !repeat;
+      updateAudioState({ repeat: newRepeat, autoplay: false });
+      localStorage.setItem("repeat", newRepeat);
       localStorage.setItem("autoplay", false);
     } else if (control === "autoplay") {
-      setAutoplay(!autoplay);
-      setRepeat(false);
+      const newAutoplay = !autoplay;
+      updateAudioState({ autoplay: newAutoplay, repeat: false });
       localStorage.setItem("repeat", false);
-      localStorage.setItem("autoplay", !autoplay);
+      localStorage.setItem("autoplay", newAutoplay);
     }
   };
 
+  // Don't render if no audio is loaded
+  if (!audioUrl) return null;
+
   return (
-    <div className="fixed bottom-0 end-0 bg-bg-color border-t border-bg-color-3 p-4 flex w-[calc(100%_-_4rem)] items-center justify-between z-[100]">
-      <div className="flex flex-row items-center justify-start gap-4 w-fit">
-        <div className="flex flex-col text-start">
-          <span className="text-sm font-medium text-text">
-            {surahName ? `${t("surah")} ${surahName}` : ``}
-          </span>
-          <span className="text-sm text-text-2">
-            {reciterName || t("unknown_reciter")}
-          </span>
-        </div>
-        <div className="flex justify-center items-center text-xs text-text-2 gap-4">
-          <Tooltip message={t("autoplay")}>
-            <button
-              onClick={() => toggleControls("autoplay")}
-              className={`text-sm ${
-                autoplay ? `text-${window.api.getColor()}-500` : "text-text-2"
-              }`}
-              aria-label={t("autoplay")}
-            >
-              {autoplay ? <IconPlaylist /> : <IconPlaylistOff />}
-            </button>
-          </Tooltip>
-          <button
-            onClick={togglePlayPause}
-            className=""
-          >
-            {isPlaying ? (
-              <IconPlayerPauseFilled size={24} />
-            ) : (
-              <IconPlayerPlayFilled size={24} />
-            )}
-          </button>
-          <Tooltip message={t("repeat")}>
-            <button
-              onClick={() => toggleControls("repeat")}
-              className={`text-sm ${
-                repeat ? `text-${window.api.getColor()}-500` : "text-text-2"
-              }`}
-              aria-label={t("repeat")}
-            >
-              {repeat ? <IconRepeat /> : <IconRepeatOff />}
-            </button>
-          </Tooltip>
-        </div>
+    <div tabIndex={1} className="fixed bottom-0 end-0 bg-bg-color border-t border-bg-color-3 p-4 flex w-[calc(100%_-_4rem)] items-center justify-between z-[100]">
+      <div className="flex flex-col text-start pe-4">
+        <span className="text-sm font-medium text-text">
+          {surahName ? `${t("surah")} ${surahName}` : ""}
+        </span>
+        <span className="text-sm text-text-2">
+          {reciterName || t("unknown_reciter")}
+        </span>
       </div>
 
-      <div className="flex flex-row items-center flex-1 mx-4">
-        <div className="flex justify-between items-center text-xs gap-2 w-full">
+      <div className="flex justify-center items-center text-xs text-text-2 gap-4">
+        <Tooltip message={t("autoplay")}>
+          <button
+            onClick={() => toggleControls("autoplay")}
+            className={`text-sm ${
+              autoplay ? `text-${window.api.getColor()}-500` : "text-text-2"
+            }`}
+            aria-label={t("autoplay")}
+          >
+            {autoplay ? <IconPlaylist /> : <IconPlaylistOff />}
+          </button>
+        </Tooltip>
+        
+        <button onClick={togglePlayPause} className="">
+          {isPlaying ? (
+            <IconPlayerPauseFilled size={24} />
+          ) : (
+            <IconPlayerPlayFilled size={24} />
+          )}
+        </button>
+        
+        <Tooltip message={t("repeat")}>
+          <button
+            onClick={() => toggleControls("repeat")}
+            className={`text-sm ${
+              repeat ? `text-${window.api.getColor()}-500` : "text-text-2"
+            }`}
+            aria-label={t("repeat")}
+          >
+            {repeat ? <IconRepeat /> : <IconRepeatOff />}
+          </button>
+        </Tooltip>
+      </div>
+
+      <div className="flex flex-col gap-2 flex-1 mx-4">
+        <div className="flex justify-between items-center text-xs gap-2 w-full text-text-2">
           <span>{formatTime(currentTime)}</span>
           <input
             type="range"
@@ -233,7 +258,13 @@ function AudioPlayer({
         />
       </div>
 
-      <audio ref={audioElement} onEnded={handleOnEnded} />
+      <button
+        onClick={closeAudioPlayer}
+        className="text-text-2 hover:text-text transition-colors ms-4"
+        aria-label={t("close")}
+      >
+        <IconX size={16} />
+      </button>
     </div>
   );
 }

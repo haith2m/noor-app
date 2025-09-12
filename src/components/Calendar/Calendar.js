@@ -131,7 +131,7 @@ const Calendar = () => {
 
   return (
     <div
-      className={`mx-auto py-8 px-4 text-text fadeIn min-h-screen relative overflow-hidden`}
+      className={`mx-auto py-8 px-4 text-text fadeIn relative overflow-hidden`}
     >
       <div className="flex items-center justify-between mb-6">
       <h1 className={`text-3xl font-medium text-text px-4 text-start`}>
