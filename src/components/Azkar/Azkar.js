@@ -45,8 +45,10 @@ function Azkar() {
   }, [currentPage, azkarPath]);
 
   document.addEventListener("keyup", (e) => {
+    if(currentPage.startsWith("azkar-")) {
     if (e.code === "Space") {
-      handleCount();
+        handleCount();
+      }
     }
   });
 
