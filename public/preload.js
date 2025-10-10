@@ -115,6 +115,22 @@ contextBridge.exposeInMainWorld("api", {
   restartAndUpdate: () => ipcRenderer.send("restart-app"),
   getAutoLaunchEnabled: () => ipcRenderer.invoke("get-auto-launch-enabled"),
   setAutoLaunch: (enabled) => ipcRenderer.invoke("set-auto-launch", enabled),
+  // Progress tracking methods
+  saveProgress: (reciterId, surahId, currentTime, duration) => 
+    ipcRenderer.invoke("save-progress", reciterId, surahId, currentTime, duration),
+  getProgress: (reciterId, surahId) => 
+    ipcRenderer.invoke("get-progress", reciterId, surahId),
+  getAllProgress: () => 
+    ipcRenderer.invoke("get-all-progress"),
+  clearProgress: (reciterId, surahId) => 
+    ipcRenderer.invoke("clear-progress", reciterId, surahId),
+  // Playlist management methods
+  getPlaylists: () => {
+    return store.get("quran-playlists") || [];
+  },
+  setPlaylists: (playlists) => {
+    store.set("quran-playlists", playlists);
+  },
   removeListener: (channel, func) => {
     const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result"];
     if (validChannels.includes(channel)) {

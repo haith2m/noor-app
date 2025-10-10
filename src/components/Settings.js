@@ -449,6 +449,65 @@ const Settings = () => {
             </div>
           </div>
 
+          <div
+            id="setting-prayer_time_correction"
+            data-section="prayer_times"
+            className={`flex flex-col p-2 rounded-md transition-colors col-span-2`}
+          >
+            <h2 className={`text-lg font-medium text-start`}>
+              {t("prayer_time_correction")}
+            </h2>
+            <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
+              {t("prayer_time_correction_description")}
+            </p>
+            <div className="flex flex-row items-center gap-4">
+              <div className="flex flex-col gap-2">
+                {["fajr", "dhuhr", "asr", "maghrib", "isha"].map((prayer) => (
+                  <div key={prayer} className="flex flex-row items-center gap-4 justify-between w-full">
+                    <span className="text-sm font-medium min-w-16 capitalize">
+                      {t(prayer)}
+                    </span>
+                    <div className="flex flex-row items-center gap-2">
+                      <button
+                        onClick={() => {
+                          const currentCorrections = updatedSettings.prayerTimeCorrections || {};
+                          const currentValue = currentCorrections[prayer] || 0;
+                          handleChange("prayerTimeCorrections", {
+                            ...currentCorrections,
+                            [prayer]: Math.max(currentValue - 1, -30)
+                          });
+                        }}
+                        className={`w-8 h-8 rounded-full bg-bg-color-3 active:scale-90 transition-all hover:bg-bg-color-3 flex items-center justify-center text-text`}
+                      >
+                        -
+                      </button>
+                      <div className="flex flex-row items-center gap-1 min-w-20 justify-center">
+                        <span className="text-sm font-mono">
+                          {((updatedSettings.prayerTimeCorrections && updatedSettings.prayerTimeCorrections[prayer]) || 0) > 0 ? "+" : ""}
+                          {(updatedSettings.prayerTimeCorrections && updatedSettings.prayerTimeCorrections[prayer]) || 0}
+                        </span>
+                        <span className="text-xs text-text-2">{t("minutes")}</span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const currentCorrections = updatedSettings.prayerTimeCorrections || {};
+                          const currentValue = currentCorrections[prayer] || 0;
+                          handleChange("prayerTimeCorrections", {
+                            ...currentCorrections,
+                            [prayer]: Math.min(currentValue + 1, 30)
+                          });
+                        }}
+                        className={`w-8 h-8 rounded-full bg-bg-color-3 active:scale-90 transition-all hover:bg-bg-color-3 flex items-center justify-center text-text`}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Location Section */}
           <div
             id="setting-location"

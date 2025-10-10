@@ -41,6 +41,19 @@ function MainApp() {
     const date = new Date();
     const prayerTimes = new PrayerTimes(coordinates, date, method);
 
+    // Get prayer time corrections from settings
+    const corrections = settings.prayerTimeCorrections || {};
+
+    // Helper function to apply corrections to a prayer time
+    const applyCorrectionToTime = (time, prayerName) => {
+      if (corrections[prayerName]) {
+        const correctedTime = new Date(time);
+        correctedTime.setMinutes(correctedTime.getMinutes() + corrections[prayerName]);
+        return correctedTime;
+      }
+      return time;
+    };
+
     const currentPrayer =
       prayerTimes.currentPrayer() === "none" ||
       prayerTimes.currentPrayer() === "sunrise"
@@ -55,12 +68,14 @@ function MainApp() {
       const currentIndex = fivePrayers.indexOf(currentPrayer);
       nextPrayer = fivePrayers[(currentIndex + 1) % fivePrayers.length];
     }
-    const nextPrayerTime = prayerTimes.timeForPrayer(nextPrayer);
+    
+    // Apply corrections to next prayer time
+    const nextPrayerTime = applyCorrectionToTime(prayerTimes.timeForPrayer(nextPrayer), nextPrayer);
 
     // Filter out sunrise and none from prayer times and format the data to be used in the Home component
     const filteredTimes = {
       fajr: {
-        time: prayerTimes.fajr,
+        time: applyCorrectionToTime(prayerTimes.fajr, "fajr"),
         nawafil: {
           before: 2,
           after: 0,
@@ -73,7 +88,7 @@ function MainApp() {
         ),
       },
       dhuhr: {
-        time: prayerTimes.dhuhr,
+        time: applyCorrectionToTime(prayerTimes.dhuhr, "dhuhr"),
         nawafil: {
           before: 4,
           after: 2,
@@ -83,7 +98,7 @@ function MainApp() {
         ),
       },
       asr: {
-        time: prayerTimes.asr,
+        time: applyCorrectionToTime(prayerTimes.asr, "asr"),
         nawafil: {
           before: 0,
           after: 0,
@@ -96,7 +111,7 @@ function MainApp() {
         ),
       },
       maghrib: {
-        time: prayerTimes.maghrib,
+        time: applyCorrectionToTime(prayerTimes.maghrib, "maghrib"),
         nawafil: {
           before: 0,
           after: 2,
@@ -109,7 +124,7 @@ function MainApp() {
         ),
       },
       isha: {
-        time: prayerTimes.isha,
+        time: applyCorrectionToTime(prayerTimes.isha, "isha"),
         nawafil: {
           before: 0,
           after: 2,
@@ -222,7 +237,7 @@ function MainApp() {
               Surah={currentPage.split("-")[2] || null}
             />
           )}
-          {currentPage === "quran-audio" && <AudioQuran />}
+          {(currentPage === "quran-audio" || currentPage === "playlist-view") && <AudioQuran />}
           {currentPage.startsWith("azkar-") && (
             <Azkar category={currentPage.split("-")[1]} />
           )}

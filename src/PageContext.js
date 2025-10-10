@@ -4,6 +4,7 @@ const PageContext = createContext();
 
 export const PageProvider = ({ children }) => {
   const [currentPage, setCurrentPage] = useState("home");
+  const [currentPlaylist, setCurrentPlaylist] = useState(null);
   const [settings, setSettings] = useState({
     language: "ar",
     theme: "light",
@@ -36,6 +37,14 @@ export const PageProvider = ({ children }) => {
     window.api.setSettings(newSettings);
   };
 
+  const setPlaylist = (playlist) => {
+    setCurrentPlaylist(playlist);
+  };
+
+  const clearPlaylist = () => {
+    setCurrentPlaylist(null);
+  };
+
   // Audio player functions
   const updateAudioState = (updates) => {
     if (updates.selectedMoshaf) {
@@ -44,15 +53,30 @@ export const PageProvider = ({ children }) => {
     setAudioState(prev => ({ ...prev, ...updates }));
   };
 
-  const playAudio = (audioUrl, surahName, reciterName, reciterId, selectedMoshaf) => {
+  const playAudio = async (audioUrl, surahName, reciterName, reciterId, selectedMoshaf, surahId) => {
+    // Check for existing progress
+    let startTime = 0;
+    if (reciterId && surahId) {
+      try {
+        const progress = await window.api.getProgress(reciterId, surahId);
+        if (progress) {
+          startTime = progress.currentTime;
+        }
+      } catch (error) {
+        console.error("Error loading progress:", error);
+      }
+    }
+
     setAudioState(prev => ({
       ...prev,
       audioUrl,
       surahName,
       reciterName,
       reciterId,
+      surahId,
       selectedMoshaf,
       isPlaying: true,
+      currentTime: startTime,
     }));
   };
 
@@ -66,6 +90,8 @@ export const PageProvider = ({ children }) => {
     if (!audio) return;
 
     if (audioState.isPlaying) {
+      // Save progress when pausing
+      saveProgress();
       audio.pause();
       setAudioState(prev => ({ ...prev, isPlaying: false }));
     } else {
@@ -74,7 +100,38 @@ export const PageProvider = ({ children }) => {
     }
   };
 
-  const handleAudioEnded = () => {
+  const saveProgress = async (customState = null) => {
+    // Use current audio state or provided state
+    const state = customState || audioState;
+    const { reciterId, surahId, currentTime, duration } = state;
+    
+    // Get actual current time from audio element if available
+    const actualCurrentTime = audioRef.current ? audioRef.current.currentTime : currentTime;
+    const actualDuration = audioRef.current ? audioRef.current.duration : duration;
+    
+    if (reciterId && surahId && actualCurrentTime && actualDuration) {
+      try {
+        await window.api.saveProgress(reciterId, surahId, actualCurrentTime, actualDuration);
+        console.log(`Progress saved (manual): ${reciterId}-${surahId} at ${Math.floor(actualCurrentTime)}s`);
+      } catch (error) {
+        console.error("Error saving progress:", error);
+      }
+    } else {
+      console.log('Progress save skipped - missing data:', { reciterId, surahId, actualCurrentTime, actualDuration });
+    }
+  };
+
+  const handleAudioEnded = async () => {
+    // Clear progress since surah completed naturally
+    const { reciterId, surahId } = audioState;
+    if (reciterId && surahId) {
+      try {
+        await window.api.clearProgress(reciterId, surahId);
+      } catch (error) {
+        console.error("Error clearing progress:", error);
+      }
+    }
+
     // Get current state dynamically to avoid stale closure
     setAudioState(currentState => {
       console.log("Current state in handleAudioEnded:", {
@@ -96,9 +153,17 @@ export const PageProvider = ({ children }) => {
         // Return current state without changing audioUrl to avoid refetching
         return { ...currentState, currentTime: 0, isPlaying: true };
       } else if (currentState.autoplay && currentState.suwarList.length > 0 && currentState.selectedMoshaf) {
-        // Play next surah
-        const currentIndex = currentState.suwarList.findIndex(s => s.name === currentState.surahName);
-        const nextSurah = currentState.suwarList[currentIndex + 1];
+        // Filter surahs to only include ones the reciter has
+        const availableSurahIds = currentState.selectedMoshaf.surah_list.split(",");
+        const availableSurahs = currentState.suwarList.filter(surah => 
+          availableSurahIds.includes(surah.id.toString())
+        );
+        
+        console.log(`Reciter has ${availableSurahs.length} surahs available for autoplay`);
+        
+        // Find current surah in the filtered list
+        const currentIndex = availableSurahs.findIndex(s => s.name === currentState.surahName);
+        const nextSurah = availableSurahs[currentIndex + 1];
         
         if (nextSurah) {
           // Helper function to pad numbers
@@ -109,15 +174,21 @@ export const PageProvider = ({ children }) => {
           
           const url = `${currentState.selectedMoshaf.server}${pad(nextSurah.id, 3)}.mp3`;
           
+          console.log(`Autoplay: Moving to next surah - ${nextSurah.name} (ID: ${nextSurah.id})`);
+          
           // Update state to play next surah
           return {
             ...currentState,
             audioUrl: url,
             surahName: nextSurah.name,
+            surahId: nextSurah.id,
             isPlaying: true,
+            currentTime: 0, // Reset to start from beginning
+            duration: 0, // Reset duration for new surah
           };
         } else {
-          // No more surahs, stop playing
+          // No more surahs available for this reciter, stop playing
+          console.log("Autoplay: Reached end of available surahs for this reciter");
           return { ...currentState, isPlaying: false };
         }
       } else {
@@ -127,7 +198,10 @@ export const PageProvider = ({ children }) => {
     });
   };
 
-  const closeAudioPlayer = () => {
+  const closeAudioPlayer = async () => {
+    // Save progress before closing
+    await saveProgress();
+    
     // set all state and its properties to null
     setAudioState(prev => ({
       ...prev,
@@ -135,11 +209,14 @@ export const PageProvider = ({ children }) => {
       surahName: "",
       reciterName: "",
       reciterId: null,
+      surahId: null,
       isPlaying: false,
       currentTime: 0,
     }));
 
-    audioRef.current.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
   };
 
   return (
@@ -147,6 +224,9 @@ export const PageProvider = ({ children }) => {
       value={{ 
         currentPage, 
         setCurrentPage, 
+        currentPlaylist,
+        setPlaylist,
+        clearPlaylist,
         settings, 
         editSettings,
         audioState,
@@ -156,6 +236,7 @@ export const PageProvider = ({ children }) => {
         togglePlayPause,
         handleAudioEnded,
         closeAudioPlayer,
+        saveProgress,
         audioRef,
       }}
     >

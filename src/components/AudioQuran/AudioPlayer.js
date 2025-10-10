@@ -52,10 +52,29 @@ function AudioPlayer() {
 
     const handleTimeUpdate = () => {
       updateAudioState({ currentTime: audio.currentTime });
+      
+      // Auto-save progress every 30 seconds during playback (backup mechanism)
+      const currentTime = audio.currentTime;
+      const lastSaveTime = audio.lastProgressSave || 0;
+      
+      if (currentTime - lastSaveTime >= 30 && audioState.reciterId && audioState.surahId) {
+        console.log(`Backup auto-save at ${Math.floor(currentTime)}s`);
+        window.api.saveProgress(
+          audioState.reciterId, 
+          audioState.surahId, 
+          currentTime, 
+          audio.duration
+        );
+        audio.lastProgressSave = currentTime;
+      }
     };
 
     const handlePlay = () => {
       updateAudioState({ isPlaying: true });
+      // Initialize the progress save marker
+      if (audio) {
+        audio.lastProgressSave = audio.currentTime || 0;
+      }
     };
 
     const handlePause = () => {
@@ -89,6 +108,17 @@ function AudioPlayer() {
       audio.volume = volume;
       audio.load();
       
+      // Set the saved current time once metadata is loaded
+      const handleLoadedMetadataForResume = () => {
+        if (currentTime > 0) {
+          audio.currentTime = currentTime;
+        }
+        // Initialize progress save marker
+        audio.lastProgressSave = audio.currentTime || 0;
+      };
+      
+      audio.addEventListener("loadedmetadata", handleLoadedMetadataForResume, { once: true });
+      
       // Only auto-play if this is a new audio source and isPlaying is true
       if (isPlaying) {
         audio.play().catch((error) => console.error("Error playing audio:", error));
@@ -102,7 +132,7 @@ function AudioPlayer() {
         artist: reciterName || "Unknown Reciter",
       });
     }
-  }, [audioUrl, surahName, reciterName, volume]);
+  }, [audioUrl, surahName, reciterName, volume, currentTime]);
 
   // Handle play/pause state changes separately
   useEffect(() => {
@@ -116,6 +146,37 @@ function AudioPlayer() {
       audio.pause();
     }
   }, [isPlaying, audioUrl]);
+
+  // Auto-save progress every 5 seconds while playing
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    console.log('Starting auto-save interval for progress tracking');
+    
+    const interval = setInterval(() => {
+      if (audioRef.current && audioState.reciterId && audioState.surahId) {
+        const audio = audioRef.current;
+        if (audio.currentTime > 10 && audio.duration > 0) { // Only save after 10 seconds
+          console.log(`Auto-saving progress: ${Math.floor(audio.currentTime)}s / ${Math.floor(audio.duration)}s`);
+          window.api.saveProgress(
+            audioState.reciterId, 
+            audioState.surahId, 
+            audio.currentTime, 
+            audio.duration
+          ).then(() => {
+            console.log('Progress auto-save successful');
+          }).catch(error => {
+            console.error('Progress auto-save failed:', error);
+          });
+        }
+      }
+    }, 1000); // Save every 1 second
+
+    return () => {
+      console.log('Stopping auto-save interval');
+      clearInterval(interval);
+    };
+  }, [isPlaying, audioState.reciterId, audioState.surahId]);
 
   // Format time in mm:ss
   const formatTime = (time) => {
@@ -134,6 +195,19 @@ function AudioPlayer() {
     if (audioRef.current) {
       audioRef.current.currentTime = newTime;
       updateAudioState({ currentTime: newTime });
+      
+      // Save progress immediately when user seeks
+      if (audioState.reciterId && audioState.surahId) {
+        console.log(`Progress saved on seek: ${Math.floor(newTime)}s`);
+        window.api.saveProgress(
+          audioState.reciterId, 
+          audioState.surahId, 
+          newTime, 
+          audioRef.current.duration
+        );
+        // Update the lastProgressSave marker
+        audioRef.current.lastProgressSave = newTime;
+      }
     }
   };
 

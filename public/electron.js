@@ -300,7 +300,14 @@ cron.schedule("* * * * *", async () => {
     const mainPrayers = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 
     if (prayerToCheck && mainPrayers.includes(prayerToCheck)) {
-      const prayerTime = moment(prayerTimes.timeForPrayer(prayerToCheck));
+      let prayerTime = moment(prayerTimes.timeForPrayer(prayerToCheck));
+      
+      // Apply prayer time corrections if they exist
+      const corrections = settings.prayerTimeCorrections || {};
+      if (corrections[prayerToCheck]) {
+        prayerTime = prayerTime.add(corrections[prayerToCheck], 'minutes');
+      }
+      
       const now = moment();
 
       if (Math.abs(prayerTime.diff(now, "minutes")) <= 1) {
@@ -414,6 +421,72 @@ ipcMain.handle("set-auto-launch", async (event, enabled) => {
     return true;
   } catch (error) {
     console.error("Error setting auto-launch:", error);
+    return false;
+  }
+});
+
+// Progress tracking handlers
+ipcMain.handle("save-progress", (event, reciterId, surahId, currentTime, duration) => {
+  try {
+    const progressData = store.get("audioProgress") || {};
+    
+    // Create a unique key for reciter-surah combination
+    const key = `${reciterId}-${surahId}`;
+    
+    // Only save if there's meaningful progress (more than 10 seconds and not completed)
+    if (currentTime > 10 && currentTime < duration - 10) {
+      progressData[key] = {
+        currentTime,
+        duration,
+        percentage: Math.round((currentTime / duration) * 100),
+        lastPlayed: Date.now()
+      };
+      
+      store.set("audioProgress", progressData);
+      return true;
+    } else if (currentTime >= duration - 10) {
+      // Mark as completed if near the end
+      delete progressData[key];
+      store.set("audioProgress", progressData);
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error("Error saving progress:", error);
+    return false;
+  }
+});
+
+ipcMain.handle("get-progress", (event, reciterId, surahId) => {
+  try {
+    const progressData = store.get("audioProgress") || {};
+    const key = `${reciterId}-${surahId}`;
+    return progressData[key] || null;
+  } catch (error) {
+    console.error("Error getting progress:", error);
+    return null;
+  }
+});
+
+ipcMain.handle("get-all-progress", () => {
+  try {
+    return store.get("audioProgress") || {};
+  } catch (error) {
+    console.error("Error getting all progress:", error);
+    return {};
+  }
+});
+
+ipcMain.handle("clear-progress", (event, reciterId, surahId) => {
+  try {
+    const progressData = store.get("audioProgress") || {};
+    const key = `${reciterId}-${surahId}`;
+    delete progressData[key];
+    store.set("audioProgress", progressData);
+    return true;
+  } catch (error) {
+    console.error("Error clearing progress:", error);
     return false;
   }
 });

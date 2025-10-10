@@ -3,7 +3,6 @@ import {
   IconMinus,
   IconSquare,
   IconX,
-  IconSearch,
   IconHomeFilled,
   IconHeadphonesFilled,
   IconBookFilled,
@@ -72,10 +71,13 @@ function TitleBar({ onOpenSearch }) {
     >
       <div className="flex items-center gap-2 w-fit mx-auto p-4 text-text-2 absolute left-0 right-0 top-0 bottom-0">
         {/* icon */}
-        {pages.find((page) => currentPage.startsWith(page.name))?.icon}
+        {pages.find((page) => 
+          currentPage.startsWith(page.name) || 
+          (currentPage === "playlist-view" && page.name === "quran-audio")
+        )?.icon}
         <h1 className="text-lg mx-auto text-center">
           {t(
-            currentPage.startsWith("quran-audio")
+            currentPage.startsWith("quran-audio") || currentPage === "playlist-view"
               ? "audio_quran"
               : currentPage.startsWith("azkar-")
               ? "azkar"
