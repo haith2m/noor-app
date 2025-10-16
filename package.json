@@ -35,7 +35,7 @@
         "AppImage",
         "snap"
       ],
-      "icon": "public/256x256.png",
+      "icon": "public/icons",
       "category": "Utility"
     },
     "snap": {
