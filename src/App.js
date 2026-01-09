@@ -24,7 +24,7 @@ import {
   IconSunrise,
   IconSunset,
 } from "@tabler/icons-react";
-import AudioQuran from "./components/AudioQuran/AudioQuran";
+import AudioLayout from "./components/AudioQuran/AudioLayout";
 import Quran from "./components/Quran/Quran";
 
 function MainApp() {
@@ -32,7 +32,6 @@ function MainApp() {
   const { currentPage, settings, audioState } = usePage();
   const [data, setData] = useState(null);
   const [prayers, setPrayers] = useState(null);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const calculatePrayerTimes = () => {
     const coordinates = new Coordinates(data.latitude, data.longitude) || null;
@@ -193,20 +192,6 @@ function MainApp() {
     setPrayers(calculatePrayerTimes());
   }, 1000 * 60 * 60);
 
-  // Add keyboard shortcut listener for search
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Open search with Ctrl+K or Command+K
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen(true);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
-
   if (!data || !prayers) {
     return (
       <div className={`flex items-center justify-center min-h-screen `}>
@@ -219,7 +204,7 @@ function MainApp() {
     return (
       <>
         <Sidebar />
-        <TitleBar onOpenSearch={() => setSearchOpen(true)} />
+        <TitleBar />
         <div
           className={`w-[calc(100%-4rem)] ms-auto mt-10 transition-all duration-300 ${
             audioState.audioUrl ? "pb-24" : ""
@@ -231,13 +216,9 @@ function MainApp() {
               <Home prayersData={prayers} />
             </>
           )}
-          {currentPage.startsWith("quran-audio-") && (
-            <AudioQuran
-              Reciter={currentPage.split("-")[2]}
-              Surah={currentPage.split("-")[2] || null}
-            />
+          {(currentPage.startsWith("quran-audio") || currentPage.startsWith("playlist-")) && (
+            <AudioLayout key="audio-layout" />
           )}
-          {(currentPage === "quran-audio" || currentPage === "playlist-view") && <AudioQuran />}
           {currentPage.startsWith("azkar-") && (
             <Azkar category={currentPage.split("-")[1]} />
           )}
@@ -258,10 +239,10 @@ function MainApp() {
 function App() {
   return (
     <PageProvider>
-      <MainApp />
-      <SoundPlayer />
-      <UpdateNotification />
-      <AudioPlayer />
+        <MainApp />
+        <SoundPlayer />
+        <UpdateNotification />
+        <AudioPlayer />
     </PageProvider>
   );
 }

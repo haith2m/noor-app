@@ -32,7 +32,7 @@ function Sidebar() {
     },
     {
       name: "quran-audio",
-      icon: (currentPage.startsWith("quran-audio") || currentPage === "playlist-view") ? (
+      icon: currentPage.startsWith("quran-audio") || currentPage.startsWith("playlist-") ? (
         <IconHeadphonesFilled size={24} />
       ) : (
         <IconHeadphones size={24} />
@@ -86,7 +86,7 @@ function Sidebar() {
                 <button
                   className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
                     (name === "quran-audio" &&
-                      currentPage.startsWith("quran-audio")) ||
+                      (currentPage.startsWith("quran-audio") || currentPage.startsWith("playlist-"))) ||
                     (name === "quran" && currentPage === "quran") ||
                     (name !== "quran" &&
                       name !== "quran-audio" &&

@@ -1,18 +1,39 @@
-import React, { useEffect, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import { IconPlus, IconMusic, IconX } from '@tabler/icons-react';
+import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
+import { IconPencil, IconTrash } from "@tabler/icons-react";
 
-const PlaylistContextMenu = ({ 
-  isOpen, 
-  position, 
-  onClose, 
-  surah, 
-  onAddToPlaylist,
-  playlists,
-  currentReciterId
-}) => {
+function PlaylistContextMenu({ x, y, onClose, onEdit, onDelete, playlistName }) {
   const { t } = useTranslation();
   const menuRef = useRef(null);
+  const [style, setStyle] = useState({ top: y, left: x, opacity: 0 });
+
+  useLayoutEffect(() => {
+      if (menuRef.current) {
+          const rect = menuRef.current.getBoundingClientRect();
+          const winWidth = window.innerWidth;
+          const winHeight = window.innerHeight;
+          
+          let newTop = y;
+          let newLeft = x;
+          
+          // Horizontal check
+          if (x + rect.width > winWidth) {
+              newLeft = x - rect.width;
+          }
+
+          // Vertical check
+          if (y + rect.height > winHeight) {
+               newTop = y - rect.height;
+          }
+
+          setStyle({
+              top: newTop,
+              left: newLeft,
+              opacity: 1
+          });
+      }
+  }, [x, y]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -20,104 +41,50 @@ const PlaylistContextMenu = ({
         onClose();
       }
     };
-
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleEscape);
-    }
+    
+    // Use timeout to ensure we don't catch the initial click event that opened the menu
+    const timer = setTimeout(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+    }, 100);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [onClose]);
 
-  const handleAddToPlaylist = (playlistId) => {
-    onAddToPlaylist(playlistId, surah);
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
-  return (
+  return createPortal(
     <div
       ref={menuRef}
-      className="fixed z-50 bg-bg-color border border-bg-color-3 rounded-lg shadow-lg py-2 min-w-[200px]"
-      style={{
-        left: position.x,
-        top: position.y,
-        maxHeight: '300px',
-        overflowY: 'auto'
-      }}
+      className="fixed z-[9999] w-48 bg-bg-color-2 rounded-lg shadow-xl border border-bg-color-3 py-1 text-sm overflow-hidden"
+      style={style}
     >
-      {/* Header */}
-      <div className="px-3 py-2 border-b border-bg-color-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <IconMusic className={`text-${window.api.getColor()}-500`} size={16} />
-            <span className="text-sm font-medium text-text">{t('add_to_playlist')}</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="text-text-2 hover:text-text transition-colors"
-          >
-            <IconX size={14} />
-          </button>
-        </div>
-        <div className="text-xs text-text-2 mt-1 truncate" title={surah.name}>
-          {surah.name}
-        </div>
+      <div className="px-3 py-2 border-b border-bg-color-3 mb-1">
+          <span className="font-semibold text-text truncate block">{playlistName}</span>
       </div>
-
-      {/* Playlists List */}
-      <div className="py-1">
-        {playlists.length === 0 ? (
-          <div className="px-3 py-4 text-center text-text-2 text-sm">
-            <IconMusic size={24} className="mx-auto mb-2 opacity-50" />
-            <p>{t('no_playlists')}</p>
-            <p className="text-xs mt-1">{t('create_your_first_playlist')}</p>
-          </div>
-        ) : (
-          playlists.map((playlist) => {
-            const isInPlaylist = playlist.surahs.some(s => 
-              s.id === surah.id && s.reciterId === currentReciterId
-            );
-            
-            return (
-              <button
-                key={playlist.id}
-                onClick={() => handleAddToPlaylist(playlist.id)}
-                disabled={isInPlaylist}
-                className={`w-full px-3 py-2 text-left text-sm transition-colors flex items-center gap-2 ${
-                  isInPlaylist
-                    ? 'text-text-2 cursor-not-allowed'
-                    : 'text-text hover:bg-bg-color-3'
-                }`}
-                title={isInPlaylist ? t('already_in_playlist') : t('add_to_playlist')}
-              >
-                <IconPlus 
-                  size={14} 
-                  className={isInPlaylist ? 'text-text-2' : `text-${window.api.getColor()}-500`} 
-                />
-                <span className="truncate flex-1" title={playlist.name}>
-                  {playlist.name}
-                </span>
-                {isInPlaylist && (
-                  <span className="text-xs text-text-2">✓</span>
-                )}
-              </button>
-            );
-          })
-        )}
-      </div>
-    </div>
+      <button
+        onClick={() => {
+          onEdit();
+          onClose();
+        }}
+        className="w-full text-start px-3 py-2 flex items-center gap-2 hover:bg-bg-color-3 text-text transition-colors"
+      >
+        <IconPencil size={16} />
+        {t("edit_playlist")}
+      </button>
+      <button
+        onClick={() => {
+          onDelete();
+          onClose();
+        }}
+        className="w-full text-start px-3 py-2 flex items-center gap-2 hover:bg-red-500/10 text-red-500 hover:text-red-600 transition-colors"
+      >
+        <IconTrash size={16} />
+        {t("delete_playlist")}
+      </button>
+    </div>,
+    document.body
   );
-};
+}
 
 export default PlaylistContextMenu;

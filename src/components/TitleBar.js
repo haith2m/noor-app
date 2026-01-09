@@ -8,14 +8,38 @@ import {
   IconBookFilled,
   IconCalendarFilled,
   IconSettingsFilled,
+  IconList,
 } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import { usePage } from "../PageContext";
 import AzkarIcon from "./AzkarIcon";
+import { useEffect, useState } from "react";
 
 function TitleBar({ onOpenSearch }) {
   const { t } = useTranslation();
   const { currentPage } = usePage();
+  const [playlistName, setPlaylistName] = useState("");
+
+  useEffect(() => {
+    if (currentPage.startsWith("playlist-")) {
+      const playlistId = currentPage.split("-")[1];
+      const playlists = window.api.getPlaylists() || [];
+      const found = playlists.find((p) => p.id === playlistId);
+      setPlaylistName(found ? found.name : "");
+      
+      const handleUpdate = () => {
+          const updatedPlaylists = window.api.getPlaylists() || [];
+          const updatedFound = updatedPlaylists.find((p) => p.id === playlistId);
+          setPlaylistName(updatedFound ? updatedFound.name : "");
+      };
+      
+      window.api.receive("playlists-updated", handleUpdate);
+      return () => window.api.removeListener("playlists-updated", handleUpdate);
+    } else {
+      setPlaylistName("");
+    }
+  }, [currentPage]);
+
   const handleClose = () => {
     window.api.close();
   };
@@ -71,18 +95,23 @@ function TitleBar({ onOpenSearch }) {
     >
       <div className="flex items-center gap-2 w-fit mx-auto p-4 text-text-2 absolute left-0 right-0 top-0 bottom-0">
         {/* icon */}
-        {pages.find((page) => 
-          currentPage.startsWith(page.name) || 
-          (currentPage === "playlist-view" && page.name === "quran-audio")
-        )?.icon}
+        {currentPage.startsWith("playlist-") ? (
+           <IconList size={20} className="text-text-2" />
+        ) : (
+          pages.find((page) => 
+            currentPage.startsWith(page.name)
+          )?.icon
+        )}
         <h1 className="text-lg mx-auto text-center">
-          {t(
-            currentPage.startsWith("quran-audio") || currentPage === "playlist-view"
-              ? "audio_quran"
-              : currentPage.startsWith("azkar-")
-              ? "azkar"
-              : currentPage.split("-")[0]
-          )}
+          {currentPage.startsWith("playlist-")
+             ? playlistName
+             : t(
+                currentPage.startsWith("quran-audio")
+                  ? "audio_quran"
+                  : currentPage.startsWith("azkar-")
+                  ? "azkar"
+                  : currentPage.split("-")[0]
+              )}
         </h1>
       </div>
 

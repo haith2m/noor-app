@@ -16,7 +16,7 @@ function Azkar() {
   });
   const [azkarCount, setAzkarCount] = useState(0);
   const [azkarPath, setAzkarPath] = useState("");
-  const { currentPage, setCurrentPage } = usePage();
+  const { currentPage, setCurrentPage, audioState } = usePage();
   const category = currentPage.split("-")[1];
   
   useEffect(() => {
@@ -126,7 +126,7 @@ function Azkar() {
               </span>{" "}
             </div>
             <div
-              className={`flex flex-row justify-between gap-4 px-4 fixed right-0 left-0 bg-bg-color-2 ms-auto bottom-0 w-[calc(100%-4rem)] border-bg-color`}
+              className={`flex flex-row justify-between gap-4 px-4 fixed right-0 left-0 bg-bg-color-2 ms-auto transition-all duration-300 ${audioState.audioUrl ? "bottom-[4.5rem]" : "bottom-0"} w-[calc(100%-4rem)] border-bg-color`}
             >
               <button
                 className={`flex flex-row justify-between gap-4 m-auto p-4 relative z-50 ${

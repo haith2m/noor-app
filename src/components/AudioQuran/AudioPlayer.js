@@ -2,21 +2,24 @@
 import {
   IconPlayerPauseFilled,
   IconPlayerPlayFilled,
-  IconPlaylist,
-  IconPlaylistOff,
   IconRepeat,
   IconRepeatOff,
   IconVolume,
   IconVolumeOff,
   IconX,
+  IconPlaylistAdd,
+  IconPlayerTrackNextFilled,
+  IconPlayerTrackNext,
 } from "@tabler/icons-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { usePage } from "../../PageContext";
 import Tooltip from "../Tooltip";
+import AddToPlaylistMenu from "./AddToPlaylistMenu";
 
 function AudioPlayer() {
   const { t, i18n } = useTranslation();
+  const [playlistMenu, setPlaylistMenu] = useState(null); // { x, y }
   const { 
     audioState, 
     updateAudioState, 
@@ -36,6 +39,9 @@ function AudioPlayer() {
     volume,
     autoplay,
     repeat,
+    surahId,
+    reciterId,
+    selectedMoshaf
   } = audioState;
 
   // Handle audio events
@@ -245,15 +251,34 @@ function AudioPlayer() {
   // Don't render if no audio is loaded
   if (!audioUrl) return null;
 
+  const handleAddToPlaylist = (e) => {
+      // Calculate position to show menu above the button
+      const rect = e.currentTarget.getBoundingClientRect();
+      // Position menu at the button's location; the menu component handles flipping upwards
+      setPlaylistMenu({
+          left: rect.left,
+          top: rect.top
+      });
+  };
+
   return (
     <div tabIndex={1} className="fixed bottom-0 end-0 bg-bg-color border-t border-bg-color-3 p-4 flex w-[calc(100%_-_4rem)] items-center justify-between z-[100]">
-      <div className="flex flex-col text-start pe-4">
+      <div className="flex flex-row text-start justify-start items-center gap-2 me-4">
+        <div className="flex flex-col">
         <span className="text-sm font-medium text-text">
           {surahName ? `${t("surah")} ${surahName}` : ""}
         </span>
         <span className="text-sm text-text-2">
           {reciterName || t("unknown_reciter")}
         </span>
+        </div>
+        <button
+            onClick={handleAddToPlaylist}
+            className="text-text-2 hover:text-text transition-colors ms-2"
+            title={t("add_to_playlist_tooltip")}
+        >
+            <IconPlaylistAdd size={20} />
+        </button>
       </div>
 
       <div className="flex justify-center items-center text-xs text-text-2 gap-4">
@@ -265,7 +290,7 @@ function AudioPlayer() {
             }`}
             aria-label={t("autoplay")}
           >
-            {autoplay ? <IconPlaylist /> : <IconPlaylistOff />}
+            {autoplay ? <IconPlayerTrackNextFilled size={24} /> : <IconPlayerTrackNext size={24} />}
           </button>
         </Tooltip>
         
@@ -339,6 +364,19 @@ function AudioPlayer() {
       >
         <IconX size={16} />
       </button>
+
+      {playlistMenu && (
+        <AddToPlaylistMenu 
+            isOpen={!!playlistMenu}
+            position={playlistMenu}
+            onClose={() => setPlaylistMenu(null)}
+            surahToAdd={{
+                surah: { id: surahId, name: surahName },
+                reciter: { id: reciterId, name: reciterName },
+                moshaf: selectedMoshaf
+            }}
+        />
+      )}
     </div>
   );
 }

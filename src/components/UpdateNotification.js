@@ -51,7 +51,7 @@ function UpdateNotification() {
             ? t('update_ready_message', 'A new version has been downloaded. Restart the application to apply the updates.')
             : t('update_available_message', 'A new version is available. The download will start automatically.')}
         </p>
-        {!updateDownloaded && (
+        {updateDownloaded && (
           <button
             onClick={handleRestart}
             className={`flex items-center mt-3 gap-2 justify-center w-full bg-${window.api.getColor()}-500 text-white py-2 px-4 rounded-md hover:bg-${window.api.getColor()}-600 transition-colors`}

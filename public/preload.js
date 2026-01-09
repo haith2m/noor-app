@@ -39,6 +39,17 @@ contextBridge.exposeInMainWorld("api", {
   getFavorites: () => {
     return store.get("favorites-reciters") || [];
   },
+  getPlaylists: () => {
+    return store.get("playlists") || [];
+  },
+  savePlaylists: (playlists) => {
+    store.set("playlists", playlists);
+    ipcRenderer.send("playlists-updated");
+  },
+  onPlaylistsUpdated: (callback) => {
+     ipcRenderer.on("playlists-updated", (event, playlists) => callback(playlists));
+  },
+
   getLocationData: async () => {
     try {
       const cachedLocation = store.get("location");
@@ -101,7 +112,7 @@ contextBridge.exposeInMainWorld("api", {
   sendNotification: (prayer) => ipcRenderer.send("notification", prayer),
   reloadPage: () => window.location.reload(),
   receive: (channel, func) => {
-    const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result"];
+    const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result", "playlists-updated"];
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => func(...args));
     }
@@ -124,17 +135,14 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("get-all-progress"),
   clearProgress: (reciterId, surahId) => 
     ipcRenderer.invoke("clear-progress", reciterId, surahId),
-  // Playlist management methods
-  getPlaylists: () => {
-    return store.get("quran-playlists") || [];
-  },
-  setPlaylists: (playlists) => {
-    store.set("quran-playlists", playlists);
-  },
   removeListener: (channel, func) => {
-    const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result"];
+    const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result", "playlists-updated"];
     if (validChannels.includes(channel)) {
-      ipcRenderer.removeListener(channel, func);
+      if (func) {
+        ipcRenderer.removeListener(channel, func);
+      } else {
+        ipcRenderer.removeAllListeners(channel);
+      }
     }
   },
 });

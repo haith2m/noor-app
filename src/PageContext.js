@@ -3,8 +3,9 @@ import React, { createContext, useContext, useEffect, useState, useRef } from "r
 const PageContext = createContext();
 
 export const PageProvider = ({ children }) => {
-  const [currentPage, setCurrentPage] = useState("home");
-  const [currentPlaylist, setCurrentPlaylist] = useState(null);
+  const [currentPage, setCurrentPage] = useState(() => {
+    return window.api.getPage() || "home";
+  });
   const [settings, setSettings] = useState({
     language: "ar",
     theme: "light",
@@ -30,19 +31,11 @@ export const PageProvider = ({ children }) => {
 
   useEffect(() => {
     setSettings(window.api.getSettings());
-    setCurrentPage(window.api.getPage());
+    // setCurrentPage is already initialized
   }, []);
 
   const editSettings = (newSettings) => {
     window.api.setSettings(newSettings);
-  };
-
-  const setPlaylist = (playlist) => {
-    setCurrentPlaylist(playlist);
-  };
-
-  const clearPlaylist = () => {
-    setCurrentPlaylist(null);
   };
 
   // Audio player functions
@@ -224,9 +217,6 @@ export const PageProvider = ({ children }) => {
       value={{ 
         currentPage, 
         setCurrentPage, 
-        currentPlaylist,
-        setPlaylist,
-        clearPlaylist,
         settings, 
         editSettings,
         audioState,

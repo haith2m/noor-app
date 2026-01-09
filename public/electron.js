@@ -149,8 +149,12 @@ function initAutoUpdater() {
     repo: "noor-app",
   });
 
-  // Don't check for updates automatically on startup
-  // Only check when user explicitly requests it
+  // Check for updates automatically on startup
+  try {
+     autoUpdater.checkForUpdatesAndNotify();
+  } catch (error) {
+    console.error("Error checking for updates:", error);
+  }
 
   // Auto updater events
   autoUpdater.on("checking-for-update", () => {
@@ -488,5 +492,11 @@ ipcMain.handle("clear-progress", (event, reciterId, surahId) => {
   } catch (error) {
     console.error("Error clearing progress:", error);
     return false;
+  }
+});
+
+ipcMain.on("playlists-updated", () => {
+  if (mainWindow) {
+    mainWindow.webContents.send("playlists-updated");
   }
 });

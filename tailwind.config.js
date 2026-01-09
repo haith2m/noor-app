@@ -2,6 +2,9 @@ module.exports = {
   content: ["./src/**/*.{html,js,jsx,ts,tsx}", "./public/index.html"],
   safelist: [
     {
+      pattern: /^bottom-([1-9][0-9]{0,2})$/i,
+    },
+    {
       pattern:
         /^bg-(green|blue|red|yellow|purple)-(100|200|300|400|500|600|700|800|900)(\/(10|15|20|25|30|35|40|45|50|55|60|65|70|75|80|85|90))?/,
     },
