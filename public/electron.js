@@ -22,6 +22,18 @@ const store = new Store();
 
 const settings = store.get("settings") || {};
 
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", (event, path) => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+}
 // Configure auto-launch
 const autoLauncher = new AutoLaunch({
   name: 'Noor',
