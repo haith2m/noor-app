@@ -6,6 +6,7 @@ const {
   Notification,
   Tray,
   Menu,
+  nativeImage,
 } = require("electron");
 const path = require("path");
 const isDev = require("electron-is-dev");
@@ -63,7 +64,23 @@ function getIcon(filename,extension) {
 }
 
 function createTray() {
-  tray = new Tray(getIcon("icon","png"));
+  const icon = nativeImage.createFromPath(getIcon("icon", "png"));
+  let trayIcon = icon;
+
+  // specific modifications for macos
+  if (process.platform === "darwin") {
+    // resize the icon since macos doesn't automatically resize it
+    trayIcon = icon.resize({
+      width: 32,
+      quality: "best",
+    });
+
+    // turn the image into a template image
+    // a template image is an image whose color is dynamic depending on the theme of the device
+    trayIcon.setTemplateImage(true);
+  }
+
+  tray = new Tray(trayIcon);
 
   const contextMenu = Menu.buildFromTemplate([
     {
