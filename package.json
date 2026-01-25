@@ -26,7 +26,7 @@
       "target": [
         "nsis"
       ],
-      "icon": "public/app.ico"
+      "icon": "public/assets/icons/app.ico"
     },
     "mac": {
       "category": "public.app-category.utilities",
@@ -39,7 +39,7 @@
           ]
         }
       ],
-      "icon": "public/app.icns",
+      "icon": "public/assets/icons/app.icns",
       "compression": "maximum",
       "darkModeSupport": "true"
     },
@@ -50,7 +50,7 @@
         "AppImage",
         "snap"
       ],
-      "icon": "public/icons",
+      "icon": "public/assets/icons",
       "category": "Utility"
     },
     "snap": {
