@@ -17,6 +17,7 @@ import Calendar from "./components/Calendar/Calendar";
 import SoundPlayer from "./components/SoundPlayer";
 import UpdateNotification from "./components/UpdateNotification";
 import AudioPlayer from "./components/AudioQuran/AudioPlayer";
+import Widgets from "./components/Widgets/Widgets";
 import {
   IconCloud,
   IconMoon,
@@ -26,12 +27,47 @@ import {
 } from "@tabler/icons-react";
 import AudioLayout from "./components/AudioQuran/AudioLayout";
 import Quran from "./components/Quran/Quran";
+import DesktopOverlay from "./components/Widgets/DesktopOverlay";
+import DesktopWidgets from "./components/Widgets/DesktopWidgets";
 
 function MainApp() {
   const { t, i18n } = useTranslation();
   const { currentPage, settings, audioState } = usePage();
   const [data, setData] = useState(null);
   const [prayers, setPrayers] = useState(null);
+  const [isOverlayMode, setIsOverlayMode] = useState(false);
+  const [isWidgetsMode, setIsWidgetsMode] = useState(false);
+  const [overlayWidget, setOverlayWidget] = useState(null);
+
+  // Check if we're in overlay mode or widgets mode
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const overlay = urlParams.get("overlay");
+    const widgets = urlParams.get("widgets");
+    const widgetParam = urlParams.get("widget");
+    
+    console.log("App mode check:", { overlay, widgets, widgetParam });
+    
+    if (overlay === "true" && widgetParam) {
+      try {
+        const widget = JSON.parse(decodeURIComponent(widgetParam));
+        setIsOverlayMode(true);
+        setOverlayWidget(widget);
+        // Make body transparent for overlay
+        document.body.style.backgroundColor = "transparent";
+        document.documentElement.style.backgroundColor = "transparent";
+      } catch (error) {
+        console.error("Error parsing widget data:", error);
+      }
+    } else if (widgets === "true") {
+      console.log("Widgets mode detected!");
+      setIsWidgetsMode(true);
+      // Make body transparent for widgets
+      document.body.style.backgroundColor = "transparent";
+      document.documentElement.style.backgroundColor = "transparent";
+      document.body.style.overflow = "hidden";
+    }
+  }, []);
 
   const calculatePrayerTimes = () => {
     const coordinates = new Coordinates(data.latitude, data.longitude) || null;
@@ -143,6 +179,11 @@ function MainApp() {
   };
 
   useEffect(() => {
+    // Skip data loading if in widgets or overlay mode
+    if (isWidgetsMode || isOverlayMode) {
+      return;
+    }
+    
     const fetchLocationData = async () => {
       try {
         const locationData = await window.api.getLocationData();
@@ -173,10 +214,15 @@ function MainApp() {
   }, [i18n.language, currentPage, t]);
 
   useEffect(() => {
+    // Skip prayer calculation if in widgets or overlay mode
+    if (isWidgetsMode || isOverlayMode) {
+      return;
+    }
+    
     if (data) {
       setPrayers(calculatePrayerTimes());
     }
-  }, [data, settings]);
+  }, [data, settings, isWidgetsMode, isOverlayMode]);
 
   useEffect(() => {
     window.api.receive("reload-prayers", () => {
@@ -191,6 +237,28 @@ function MainApp() {
   setInterval(() => {
     setPrayers(calculatePrayerTimes());
   }, 1000 * 60 * 60);
+
+  // If in widgets mode, show only the widgets
+  if (isWidgetsMode) {
+    console.log("App: Rendering DesktopWidgets component");
+    return <DesktopWidgets />;
+  }
+
+  // If in overlay mode, show only the overlay
+  if (isOverlayMode && overlayWidget) {
+    return (
+      <DesktopOverlay
+        widget={overlayWidget}
+        onPlace={(position) => {
+          window.api.sendWidgetPosition(position);
+        }}
+        onCancel={async () => {
+          await window.api.closeDesktopOverlay();
+        }}
+        isDesktopOverlay={true}
+      />
+    );
+  }
 
   if (!data || !prayers) {
     return (
@@ -226,6 +294,7 @@ function MainApp() {
           {currentPage === "azkar" && <AzkarCategories />}
           {currentPage.startsWith("settings") && <Settings />}
           {currentPage === "calendar" && <Calendar />}
+          {currentPage === "widgets" && <Widgets />}
         </div>
       </>
     );

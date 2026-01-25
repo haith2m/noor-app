@@ -1,0 +1,93 @@
+[
+  { "nameKey": "event.hijri_new_year", "month": 1, "day": 1, "color": "orange" },
+  { "nameKey": "event.tasua", "month": 1, "day": 9, "color": "purple" },
+  { "nameKey": "event.ashura", "month": 1, "day": 10, "color": "purple" },
+  { "nameKey": "event.ramadan_start", "month": 9, "day": 1, "color": "orange" },
+  { "nameKey": "event.eid_al_fitr", "month": 10, "day": 1, "color": "orange" },
+  {
+    "nameKey": "event.six_shawwal_1",
+    "month": 10,
+    "day": 2,
+    "color": "blue"
+  },
+  {
+    "nameKey": "event.six_shawwal_2",
+    "month": 10,
+    "day": 3,
+    "color": "blue"
+  },
+  {
+    "nameKey": "event.six_shawwal_3",
+    "month": 10,
+    "day": 4,
+    "color": "blue"
+  },
+  {
+    "nameKey": "event.six_shawwal_4",
+    "month": 10,
+    "day": 5,
+    "color": "blue"
+  },
+  {
+    "nameKey": "event.six_shawwal_5",
+    "month": 10,
+    "day": 6,
+    "color": "blue"
+  },
+  {
+    "nameKey": "event.six_shawwal_6",
+    "month": 10,
+    "day": 7,
+    "color": "blue"
+  },
+  { "nameKey": "event.dhul_hijjah_fasting_1", "month": 12, "day": 1, "color": "green" },
+  {
+    "nameKey": "event.dhul_hijjah_fasting_2",
+    "month": 12,
+    "day": 2,
+    "color": "green"
+  },
+  {
+    "nameKey": "event.dhul_hijjah_fasting_3",
+    "month": 12,
+    "day": 3,
+    "color": "green"
+  },
+  {
+    "nameKey": "event.dhul_hijjah_fasting_4",
+    "month": 12,
+    "day": 4,
+    "color": "green"
+  },
+  {
+    "nameKey": "event.dhul_hijjah_fasting_5",
+    "month": 12,
+    "day": 5,
+    "color": "green"
+  },
+  {
+    "nameKey": "event.dhul_hijjah_fasting_6",
+    "month": 12,
+    "day": 6,
+    "color": "green"
+  },
+  {
+    "nameKey": "event.dhul_hijjah_fasting_7",
+    "month": 12,
+    "day": 7,
+    "color": "green"
+  },
+  {
+    "nameKey": "event.dhul_hijjah_fasting_8",
+    "month": 12,
+    "day": 8,
+    "color": "green"
+  },
+
+  { "nameKey": "event.day_of_arafah", "month": 12, "day": 9, "color": "purple" },
+  { "nameKey": "event.eid_al_adha", "month": 12, "day": 10, "color": "orange" },
+
+  { "nameKey": "event.tashreeq_days", "month": 12, "day": 11, "color": "blue" },
+  { "nameKey": "event.tashreeq_days", "month": 12, "day": 12, "color": "blue" },
+  { "nameKey": "event.tashreeq_days", "month": 12, "day": 13, "color": "blue" }
+]

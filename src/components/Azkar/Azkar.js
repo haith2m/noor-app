@@ -18,10 +18,10 @@ function Azkar() {
   const [azkarPath, setAzkarPath] = useState("");
   const { currentPage, setCurrentPage, audioState } = usePage();
   const category = currentPage.split("-")[1];
-  
+
   useEffect(() => {
     const fetchPath = async () => {
-      const path = await window.api.getResourcePath("azkar.json");
+      const path = await window.api.getResourcePath("data/azkar/azkar.json");
       setAzkarPath(path);
     };
 
@@ -45,8 +45,8 @@ function Azkar() {
   }, [currentPage, azkarPath]);
 
   document.addEventListener("keyup", (e) => {
-    if(currentPage.startsWith("azkar-")) {
-    if (e.code === "Space") {
+    if (currentPage.startsWith("azkar-")) {
+      if (e.code === "Space") {
         handleCount();
       }
     }
@@ -87,16 +87,18 @@ function Azkar() {
   if (azkar.length === 0) return <Loading />;
 
   return (
-    <div
-      className={`mx-auto py-8 fadeIn relative overflow-hidden`}
-    >
+    <div className={`mx-auto py-8 fadeIn relative overflow-hidden`}>
       {azkar.length > 0 && azkar[azkarPage].content !== "stop" ? (
         <>
           <button
             className={`flex flex-row w-fit items-center gap-2 mt-4 me-auto px-4 relative z-50 text-${window.api.getColor()}-500`}
             onClick={() => setCurrentPage("azkar")}
           >
-            <IconChevronRight />
+            {i18n.language === "ar" ? (
+              <IconChevronRight />
+            ) : (
+              <IconChevronLeft />
+            )}
             <h1 className={`text-base font-medium`}>{t("return")}</h1>
           </button>
           <div

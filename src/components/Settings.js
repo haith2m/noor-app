@@ -9,18 +9,37 @@ import {
   IconPalette,
   IconSettings,
   IconMapPin,
+  IconBrandGithubFilled,
+  IconChevronDown,
+  IconLayoutDashboard,
 } from "@tabler/icons-react";
-import { BsChevronDown, BsGithub } from "react-icons/bs";
 
 const Settings = () => {
   const { t } = useTranslation();
-  const { settings, editSettings, currentPage, setCurrentPage } = usePage();
+  const { settings, editSettings, currentPage, setCurrentPage, audioState } = usePage();
 
   const [updatedSettings, setUpdatedSettings] = useState(settings);
   const [settingsChanged, setSettingsChanged] = useState(false);
   const [updateStatus, setUpdateStatus] = useState(null);
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [widgetSettings, setWidgetSettings] = useState(() => {
+    return window.api.getWidgetSettings?.() || {
+      theme: "light",
+      color: "green",
+      borderRadius: 12,
+      backgroundOpacity: 100,
+    };
+  });
+  const [originalWidgetSettings, setOriginalWidgetSettings] = useState(() => {
+    return window.api.getWidgetSettings?.() || {
+      theme: "light",
+      color: "green",
+      borderRadius: 12,
+      backgroundOpacity: 100,
+    };
+  });
+  const [widgetSettingsChanged, setWidgetSettingsChanged] = useState(false);
 
   // Extract current section from currentPage (e.g., "settings-location" -> "location")
   const currentSection = currentPage.startsWith("settings-") 
@@ -32,6 +51,12 @@ const Settings = () => {
       JSON.stringify(settings) !== JSON.stringify(updatedSettings)
     );
   }, [settings, updatedSettings]);
+
+  useEffect(() => {
+    setWidgetSettingsChanged(
+      JSON.stringify(originalWidgetSettings) !== JSON.stringify(widgetSettings)
+    );
+  }, [originalWidgetSettings, widgetSettings]);
 
   useEffect(() => {
     const allSections = document.querySelectorAll("[data-section]");
@@ -82,6 +107,28 @@ const Settings = () => {
 
   const handleChange = (key, value) => {
     setUpdatedSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleWidgetSettingChange = (key, value) => {
+    setWidgetSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const applyWidgetSettings = () => {
+    window.api.setWidgetSettings?.(widgetSettings);
+    setOriginalWidgetSettings(widgetSettings);
+    setWidgetSettingsChanged(false);
+    // Reload widgets window to apply changes
+    setTimeout(() => {
+      window.api.closeWidgetsWindow?.();
+      setTimeout(() => {
+        window.api.showWidgetsWindow?.();
+      }, 300);
+    }, 100);
+  };
+
+  const discardWidgetSettings = () => {
+    setWidgetSettings(originalWidgetSettings);
+    setWidgetSettingsChanged(false);
   };
 
   const applySettings = async () => {
@@ -196,6 +243,12 @@ const Settings = () => {
       onClick: () => setCurrentPage("settings-location"),
     },
     {
+      name: t("widgets"),
+      id: "widgets",
+      icon: <IconLayoutDashboard size={20} />,
+      onClick: () => setCurrentPage("settings-widgets"),
+    },
+    {
       name: t("app_settings"),
       id: "app_settings",
       icon: <IconSettings size={20} />,
@@ -229,7 +282,7 @@ const Settings = () => {
           </button>
         ))}
         {/* app information */}
-        <div className="flex flex-col items-start justify-end h-full gap-2 p-2">
+        <div className="flex flex-col items-start justify-end text-start h-full gap-2 p-2">
           <p className="text-sm text-text-2">
             {t("version")} {window.api.getAppVersion()}
           </p>
@@ -243,7 +296,7 @@ const Settings = () => {
             }
             className="text-sm flex flex-row items-center justify-start gap-2 text-text-2 hover:text-text transition-colors"
           >
-            <BsGithub size={16} />
+            <IconBrandGithubFilled size={16} />
             {t("repository")}
           </button>
         </div>
@@ -398,7 +451,7 @@ const Settings = () => {
               {t("calculation_method_description")}
             </p>
             <div className={`flex flex-row flex-wrap gap-2 text-ellipsis w-fit relative`}>
-              <BsChevronDown size={16} className="absolute end-3 top-1/2 transform -translate-y-1/2" />
+              <IconChevronDown size={16} className="absolute end-3 top-1/2 transform -translate-y-1/2" />
               <select
                 className={`rounded-lg appearance-none focus:outline-none border bg-bg-color border-bg-color-3 p-2 px-4 text-ellipsis w-64`}
                 value={updatedSettings.calculationMethod}
@@ -535,6 +588,161 @@ const Settings = () => {
             </p>
           </div>
 
+          {/* Widget Settings Section */}
+          <div
+            id="setting-widget-theme"
+            data-section="widgets"
+            className={`flex flex-col p-2 rounded-md transition-colors`}
+          >
+            <h2 className={`text-lg font-medium text-start`}>{t("widgets_theme")}</h2>
+            <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
+              {t("widgets_theme_description")}
+            </p>
+            <div className={`flex flex-row gap-2`}>
+              <Tooltip message={t("light")}>
+                <button
+                  className={`w-8 h-8 rounded-full border ${
+                    widgetSettings.theme === "light"
+                      ? `border-${window.api.getColor()}-500`
+                      : "border-bg-color-3"
+                  } bg-white`}
+                  onClick={() => handleWidgetSettingChange("theme", "light")}
+                />
+              </Tooltip>
+              <Tooltip message={t("dark")}>
+                <button
+                  className={`w-8 h-8 rounded-full border ${
+                    widgetSettings.theme === "dark"
+                      ? `border-${window.api.getColor()}-500`
+                      : "border-bg-color-3"
+                  } bg-black`}
+                  onClick={() => handleWidgetSettingChange("theme", "dark")}
+                />
+              </Tooltip>
+              <Tooltip message={t("monochrome")}>
+                <button
+                  className={`w-8 h-8 rounded-full border ${
+                    widgetSettings.theme === "monochrome"
+                      ? `border-${window.api.getColor()}-500`
+                      : "border-bg-color-3"
+                  } bg-gradient-to-br from-gray-400 to-gray-600`}
+                  onClick={() => handleWidgetSettingChange("theme", "monochrome")}
+                />
+              </Tooltip>
+            </div>
+          </div>
+
+          <div
+            id="setting-widget-color"
+            data-section="widgets"
+            className={`flex flex-col p-2 rounded-md transition-colors`}
+          >
+            <h2 className={`text-lg font-medium text-start`}>{t("widgets_color")}</h2>
+            <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
+              {t("widgets_color_description")}
+            </p>
+            <div className={`flex flex-row flex-wrap gap-2`}>
+              <Tooltip message={t("green")}>
+                <button
+                  className={`w-8 h-8 rounded-full border ${
+                    widgetSettings.color === "green"
+                      ? `border-${window.api.getColor()}-500`
+                      : "border-bg-color-3"
+                  } bg-green-500`}
+                  onClick={() => handleWidgetSettingChange("color", "green")}
+                />
+              </Tooltip>
+              <Tooltip message={t("blue")}>
+                <button
+                  className={`w-8 h-8 rounded-full border ${
+                    widgetSettings.color === "blue"
+                      ? `border-${window.api.getColor()}-500`
+                      : "border-bg-color-3"
+                  } bg-blue-500`}
+                  onClick={() => handleWidgetSettingChange("color", "blue")}
+                />
+              </Tooltip>
+              <Tooltip message={t("red")}>
+                <button
+                  className={`w-8 h-8 rounded-full border ${
+                    widgetSettings.color === "red"
+                      ? `border-${window.api.getColor()}-500`
+                      : "border-bg-color-3"
+                  } bg-red-500`}
+                  onClick={() => handleWidgetSettingChange("color", "red")}
+                />
+              </Tooltip>
+              <Tooltip message={t("yellow")}>
+                <button
+                  className={`w-8 h-8 rounded-full border ${
+                    widgetSettings.color === "yellow"
+                      ? `border-${window.api.getColor()}-500`
+                      : "border-bg-color-3"
+                  } bg-yellow-500`}
+                  onClick={() => handleWidgetSettingChange("color", "yellow")}
+                />
+              </Tooltip>
+              <Tooltip message={t("purple")}>
+                <button
+                  className={`w-8 h-8 rounded-full border ${
+                    widgetSettings.color === "purple"
+                      ? `border-${window.api.getColor()}-500`
+                      : "border-bg-color-3"
+                  } bg-purple-500`}
+                  onClick={() => handleWidgetSettingChange("color", "purple")}
+                />
+              </Tooltip>
+            </div>
+          </div>
+
+          <div
+            id="setting-widget-border-radius"
+            data-section="widgets"
+            className={`flex flex-col p-2 rounded-md transition-colors`}
+          >
+            <h2 className={`text-lg font-medium text-start`}>{t("widgets_border_radius")}</h2>
+            <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
+              {t("widgets_border_radius_description")}
+            </p>
+            <div className="flex flex-row items-center gap-4">
+              <input
+                type="range"
+                min="0"
+                max="24"
+                value={widgetSettings.borderRadius}
+                onChange={(e) => handleWidgetSettingChange("borderRadius", parseInt(e.target.value))}
+                className="flex-1"
+              />
+              <span className="text-sm font-mono min-w-12 text-center">
+                {widgetSettings.borderRadius}px
+              </span>
+            </div>
+          </div>
+
+          <div
+            id="setting-widget-background-opacity"
+            data-section="widgets"
+            className={`flex flex-col p-2 rounded-md transition-colors`}
+          >
+            <h2 className={`text-lg font-medium text-start`}>{t("widgets_background_opacity")}</h2>
+            <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
+              {t("widgets_background_opacity_description")}
+            </p>
+            <div className="flex flex-row items-center gap-4">
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={widgetSettings.backgroundOpacity}
+                onChange={(e) => handleWidgetSettingChange("backgroundOpacity", parseInt(e.target.value))}
+                className="flex-1"
+              />
+              <span className="text-sm font-mono min-w-16 text-center">
+                {widgetSettings.backgroundOpacity}%
+              </span>
+            </div>
+          </div>
+
           <div
             id="setting-minimize_to_tray"
             data-section="app_settings"
@@ -603,34 +811,62 @@ const Settings = () => {
             </div>
           </div>
 
-          <div
-            className={`flex flex-row justify-between items-center gap-4 p-4 bg-${window.api.getColor()}-500/25 backdrop-blur-lg text-text fixed start-20 bottom-4 rounded-lg w-[calc(100%-6rem)] ${
-              settingsChanged ? "slideUp" : "slideDown"
-            }`}
-          >
-            <div className={`flex flex-col p-2 rounded-md transition-colors`}>
-              <h1 className={`text-lg font-medium text-start`}>
-                {t("settings_changed")}
-              </h1>
-              <p className={`text-sm font-normal text-start text-text-2`}>
-                {t("app_will_reload")}
-              </p>
+          {settingsChanged && (currentSection !== "widgets" || !widgetSettingsChanged) && (
+            <div
+              className={`flex flex-row justify-between items-center gap-4 p-4 bg-${window.api.getColor()}-500/25 text-text fixed start-20 ${audioState?.audioUrl ? "bottom-20" : "bottom-4"} rounded-lg w-[calc(100%-6rem)] slideUp`}
+            >
+              <div className={`flex flex-col p-2 rounded-md transition-colors`}>
+                <h1 className={`text-lg font-medium text-start`}>
+                  {t("settings_changed")}
+                </h1>
+                <p className={`text-sm font-normal text-start text-text-2`}>
+                  {t("app_will_reload")}
+                </p>
+              </div>
+              <div className={`flex flex-row gap-4`}>
+                <button
+                  className={`bg-green-700 p-2 rounded-lg text-white px-4`}
+                  onClick={applySettings}
+                >
+                  {t("yes")}
+                </button>
+                <button
+                  className={`bg-red-700 p-2 rounded-lg text-white px-4`}
+                  onClick={discardChanges}
+                >
+                  {t("no")}
+                </button>
+              </div>
             </div>
-            <div className={`flex flex-row gap-4`}>
-              <button
-                className={`bg-green-700 p-2 rounded-lg text-white px-4`}
-                onClick={applySettings}
-              >
-                {t("yes")}
-              </button>
-              <button
-                className={`bg-red-700 p-2 rounded-lg text-white px-4`}
-                onClick={discardChanges}
-              >
-                {t("no")}
-              </button>
+          )}
+          {widgetSettingsChanged && currentSection === "widgets" && !settingsChanged && (
+            <div
+              className={`flex flex-row justify-between items-center gap-4 p-4 bg-${window.api.getColor()}-500/25 text-text fixed start-20 ${audioState?.audioUrl ? "bottom-20" : "bottom-4"} rounded-lg w-[calc(100%-6rem)] slideUp`}
+            >
+              <div className={`flex flex-col p-2 rounded-md transition-colors`}>
+                <h1 className={`text-lg font-medium text-start`}>
+                  {t("widgets_settings_changed")}
+                </h1>
+                <p className={`text-sm font-normal text-start text-text-2`}>
+                  {t("widgets_will_reload")}
+                </p>
+              </div>
+              <div className={`flex flex-row gap-4`}>
+                <button
+                  className={`bg-green-700 p-2 rounded-lg text-white px-4`}
+                  onClick={applyWidgetSettings}
+                >
+                  {t("yes")}
+                </button>
+                <button
+                  className={`bg-red-700 p-2 rounded-lg text-white px-4`}
+                  onClick={discardWidgetSettings}
+                >
+                  {t("no")}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <div
           className="p-4 mt-4 bg-bg-color-2 rounded-lg shadow-sm"

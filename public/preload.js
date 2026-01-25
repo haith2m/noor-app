@@ -135,6 +135,148 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("get-all-progress"),
   clearProgress: (reciterId, surahId) => 
     ipcRenderer.invoke("clear-progress", reciterId, surahId),
+  // Quran reading progress methods (per surah)
+  saveQuranProgress: (surahId, page) => {
+    try {
+      if (!surahId || !page) {
+        console.warn("saveQuranProgress: Missing surahId or page", { surahId, page });
+        return false;
+      }
+      const progress = store.get("quran-progress") || {};
+      // Ensure surahId is a string for consistent key storage
+      const key = String(surahId);
+      progress[key] = Number(page);
+      store.set("quran-progress", progress);
+      console.log("Progress saved:", { surahId: key, page, progress });
+      return true;
+    } catch (error) {
+      console.error("Error saving Quran progress:", error);
+      return false;
+    }
+  },
+  getQuranProgress: (surahId) => {
+    try {
+      if (!surahId) return null;
+      const progress = store.get("quran-progress") || {};
+      // Ensure surahId is a string for consistent key lookup
+      const key = String(surahId);
+      return progress[key] || null;
+    } catch (error) {
+      console.error("Error getting Quran progress:", error);
+      return null;
+    }
+  },
+  getAllQuranProgress: () => {
+    try {
+      return store.get("quran-progress") || {};
+    } catch (error) {
+      console.error("Error getting all Quran progress:", error);
+      return {};
+    }
+  },
+  clearQuranProgress: (surahId) => {
+    try {
+      const progress = store.get("quran-progress") || {};
+      if (surahId) {
+        // Clear progress for specific surah
+        const key = String(surahId);
+        delete progress[key];
+        store.set("quran-progress", progress);
+      } else {
+        // Clear all progress
+        store.delete("quran-progress");
+      }
+      return true;
+    } catch (error) {
+      console.error("Error clearing Quran progress:", error);
+      return false;
+    }
+  },
+  // Widget storage methods
+  getWidgets: () => {
+    try {
+      return store.get("widgets") || [];
+    } catch (error) {
+      console.error("Error getting widgets:", error);
+      return [];
+    }
+  },
+  saveWidgets: (widgets) => {
+    try {
+      store.set("widgets", widgets);
+      return true;
+    } catch (error) {
+      console.error("Error saving widgets:", error);
+      return false;
+    }
+  },
+  // Widget settings methods
+  getWidgetSettings: () => {
+    try {
+      return store.get("widget-settings") || {
+        theme: "light",
+        color: "green",
+        borderRadius: 12,
+        backgroundOpacity: 100,
+      };
+    } catch (error) {
+      console.error("Error getting widget settings:", error);
+      return {
+        theme: "light",
+        color: "green",
+        borderRadius: 12,
+        backgroundOpacity: 100,
+      };
+    }
+  },
+  setWidgetSettings: (settings) => {
+    try {
+      store.set("widget-settings", settings);
+      return true;
+    } catch (error) {
+      console.error("Error saving widget settings:", error);
+      return false;
+    }
+  },
+  getWidgetColor: () => {
+    try {
+      const widgetSettings = store.get("widget-settings") || {};
+      return widgetSettings.color || "green";
+    } catch (error) {
+      console.error("Error getting widget color:", error);
+      return "green";
+    }
+  },
+  getWidgetTheme: () => {
+    try {
+      const widgetSettings = store.get("widget-settings") || {};
+      return widgetSettings.theme || "light";
+    } catch (error) {
+      console.error("Error getting widget theme:", error);
+      return "light";
+    }
+  },
+  // Desktop overlay methods
+  showDesktopOverlay: (widgetData) => 
+    ipcRenderer.invoke("show-desktop-overlay", widgetData),
+  closeDesktopOverlay: () => 
+    ipcRenderer.invoke("close-desktop-overlay"),
+  sendWidgetPosition: (position) => 
+    ipcRenderer.send("widget-position-selected", position),
+  cancelWidgetOverlay: () => 
+    ipcRenderer.send("widget-overlay-cancelled"),
+  getDesktopWallpaper: () => 
+    ipcRenderer.invoke("get-desktop-wallpaper"),
+  getDesktopWallpaperDataUrl: () => 
+    ipcRenderer.invoke("get-desktop-wallpaper-data-url"),
+  onWidgetPositionSelected: (callback) => {
+    ipcRenderer.on("widget-position-selected", (event, position) => callback(position));
+  },
+  // Widgets window methods
+  showWidgetsWindow: () => 
+    ipcRenderer.invoke("show-widgets-window"),
+  closeWidgetsWindow: () => 
+    ipcRenderer.invoke("close-widgets-window"),
   removeListener: (channel, func) => {
     const validChannels = ["reload-prayers", "play-adhan", "update-available", "update-downloaded", "update-check-result", "playlists-updated"];
     if (validChannels.includes(channel)) {

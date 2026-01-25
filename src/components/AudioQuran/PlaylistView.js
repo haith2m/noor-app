@@ -4,7 +4,7 @@ import { IconPencil, IconChevronRight, IconChevronLeft, IconArrowUp, IconPlaylis
 import CreatePlaylistModal from "./CreatePlaylistModal";
 import { usePage } from "../../PageContext";
 import SurahCard from "../SurahCard";
-import SearchBar from "./SearchBar";
+import SearchBar from "../SearchBar";
 
 function PlaylistView({ playlistId }) {
   const { t, i18n } = useTranslation();

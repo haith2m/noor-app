@@ -15,7 +15,7 @@ function Times({ prayersData }) {
 
   useEffect(() => {
     const fetchPath = async () => {
-      const path = await window.api.getResourcePath("azkar.json");
+      const path = await window.api.getResourcePath("data/azkar/azkar.json");
       setAzkarPath(path);
     };
 

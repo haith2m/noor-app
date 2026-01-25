@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { IconX } from "@tabler/icons-react";
 
@@ -10,19 +10,35 @@ function CreatePlaylistModal({ isOpen, onClose, onSave, initialName = "" }) {
     setName(initialName);
   }, [initialName, isOpen]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (name.trim()) {
       onSave(name);
       onClose();
       setName("");
     }
-  };
+  }, [name, onSave, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      } else if (e.key === "Enter" && e.target.tagName !== "BUTTON") {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose, handleSave]);
 
   if (!isOpen) return null;
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="fixed left-16 right-0 top-0 bottom-0 z-[9999] flex items-center justify-center bg-black/50 rtl:left-0 rtl:right-16"
       onClick={onClose}
     >
       <div 
@@ -42,6 +58,12 @@ function CreatePlaylistModal({ isOpen, onClose, onSave, initialName = "" }) {
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleSave();
+            }
+          }}
           placeholder={t("playlist_name")}
           className="w-full bg-bg-color-3 border border-bg-color-3 text-text rounded-lg px-4 py-2 mb-4 focus:outline-none focus:border-text-2"
           autoFocus

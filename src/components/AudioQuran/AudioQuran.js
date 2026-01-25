@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import Loading from "../Loading";
 import ReciterCard from "./ReciterCard";
 import SurahCard from "../SurahCard";
-import SearchBar from "./SearchBar";
+import SearchBar from "../SearchBar";
 import { usePage } from "../../PageContext";
 import MoshafSelector from "./MoshafSelector";
 import AddToPlaylistMenu from "./AddToPlaylistMenu";
@@ -53,7 +53,7 @@ function AudioQuran({ Reciter }) {
       try {
         const language = window.api.getSettings()?.language || "ar";
         const response = await fetch(
-          `${process.env.PUBLIC_URL}/suwar-${language}.json`
+          `${process.env.PUBLIC_URL}/data/suwar/suwar-${language}.json`
         );
         const result = await response.json();
         setSuwar(result.suwar);
@@ -87,7 +87,7 @@ function AudioQuran({ Reciter }) {
     });
     const language = window.api.getSettings().language || "ar";
 
-    fetch(`${process.env.PUBLIC_URL}/reciters-${language}.json`)
+    fetch(`${process.env.PUBLIC_URL}/data/reciters/reciters-${language}.json`)
       .then((res) => res.json())
       .then(
         (result) => {

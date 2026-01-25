@@ -37,8 +37,8 @@ if (!gotTheLock) {
 }
 // Configure auto-launch
 const autoLauncher = new AutoLaunch({
-  name: 'Noor',
-  path: app.getPath('exe'),
+  name: "Noor",
+  path: app.getPath("exe"),
 });
 
 i18next.init({
@@ -46,41 +46,93 @@ i18next.init({
   supportedLngs: ["ar", "en"],
   fallbackLng: "ar",
   resources: {
-    en: { translation: require("./en.json") },
-    ar: { translation: require("./ar.json") },
+    en: { translation: require("./locales/en.json") },
+    ar: { translation: require("./locales/ar.json") },
   },
 });
 
 let mainWindow;
+let overlayWindow = null;
+let widgetsWindow = null;
 let tray = null;
 
 app.disableHardwareAcceleration();
 
-function getIcon(filename,extension) {
+function getIcon(filename, extension) {
   const ext = extension || (process.platform === "linux" ? "png" : "ico");
-  const devPath = path.join(__dirname, "../public", `${filename}.${ext}`);
-  const prodPath = path.join(__dirname, "../build", `${filename}.${ext}`);
+  const devPath = path.join(
+    __dirname,
+    "../public/assets/icons",
+    `${filename}.${ext}`
+  );
+  const prodPath = path.join(
+    __dirname,
+    "../build/assets/icons",
+    `${filename}.${ext}`
+  );
   return isDev ? devPath : prodPath;
 }
 
-function createTray() {
-  const icon = nativeImage.createFromPath(getIcon("icon", "png"));
-  let trayIcon = icon;
+function updateTrayTitle() {
+  if (!tray) return;
 
-  // specific modifications for macos
-  if (process.platform === "darwin") {
-    // resize the icon since macos doesn't automatically resize it
-    trayIcon = icon.resize({
-      width: 32,
-      quality: "best",
-    });
+  try {
+    const location = store.get("location");
+    const settings = store.get("settings") || {};
 
-    // turn the image into a template image
-    // a template image is an image whose color is dynamic depending on the theme of the device
-    trayIcon.setTemplateImage(true);
+    if (!location || !location.latitude || !location.longitude) {
+      tray.setTitle("");
+      return;
+    }
+
+    const coordinates = new Coordinates(location.latitude, location.longitude);
+    const method = settings.calculationMethod || "UmmAlQura";
+    const params = CalculationMethod[method]();
+
+    // Calculate prayer times
+    let prayerTimes;
+    try {
+      prayerTimes = new PrayerTimes(coordinates, new Date(), params);
+    } catch (error) {
+      console.error("Error calculating prayer times for tray:", error);
+      tray.setTitle("");
+      return;
+    }
+
+    const nextPrayer = prayerTimes.nextPrayer();
+
+    // Only show main prayers (skip sunrise, sunset, none)
+    const mainPrayers = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+
+    if (nextPrayer && mainPrayers.includes(nextPrayer)) {
+      let prayerTime = moment(prayerTimes.timeForPrayer(nextPrayer));
+
+      // Apply prayer time corrections if they exist
+      const corrections = settings.prayerTimeCorrections || {};
+      if (corrections[nextPrayer]) {
+        prayerTime = prayerTime.add(corrections[nextPrayer], "minutes");
+      }
+
+      // Capitalize first letter of prayer name
+      const prayerName =
+        nextPrayer.charAt(0).toUpperCase() + nextPrayer.slice(1);
+
+      // Format time as "H:mm" (24-hour format, e.g., "5:26")
+      const timeString = prayerTime.format("H:mm");
+
+      // Set tray title: "Fajr 5:26"
+      tray.setTitle(`${prayerName} ${timeString}`);
+    } else {
+      tray.setTitle("");
+    }
+  } catch (error) {
+    console.error("Error updating tray title:", error);
+    tray.setTitle("");
   }
+}
 
-  tray = new Tray(trayIcon);
+function createTray() {
+  tray = new Tray(getIcon("icon", "png"));
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -120,6 +172,9 @@ function createTray() {
       mainWindow.focus();
     }
   });
+
+  // Update tray title on creation
+  updateTrayTitle();
 }
 
 function createMainWindow() {
@@ -180,7 +235,7 @@ function initAutoUpdater() {
 
   // Check for updates automatically on startup
   try {
-     autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.checkForUpdatesAndNotify();
   } catch (error) {
     console.error("Error checking for updates:", error);
   }
@@ -199,7 +254,10 @@ function initAutoUpdater() {
     console.log("Update not available:", info);
     mainWindow?.webContents.send("update-check-result", {
       type: "no-update",
-      message: i18next.t("app_up_to_date", "You are running the latest version")
+      message: i18next.t(
+        "app_up_to_date",
+        "You are running the latest version"
+      ),
     });
   });
 
@@ -207,7 +265,10 @@ function initAutoUpdater() {
     console.log("Update not available:", info);
     mainWindow.webContents.send("update-check-result", {
       type: "no-update",
-      message: i18next.t("app_up_to_date", "You are running the latest version")
+      message: i18next.t(
+        "app_up_to_date",
+        "You are running the latest version"
+      ),
     });
   });
 
@@ -229,11 +290,11 @@ function initAutoUpdater() {
 
   autoUpdater.on("error", (err) => {
     console.error("Error in auto-updater:", err);
-    
+
     mainWindow?.webContents.send("update-check-result", {
       type: "error",
       error: err,
-      message: i18next.t("update_error_message", "Failed to check for updates")
+      message: i18next.t("update_error_message", "Failed to check for updates"),
     });
   });
 }
@@ -278,7 +339,7 @@ function sendPrayerNotification(prayer) {
 
     // Play adhan
     if (mainWindow) {
-      const adhanPath = getResourcePath("adhan.wav");
+      const adhanPath = getResourcePath("assets/audio/adhan.wav");
       mainWindow.webContents.send("play-adhan", {
         path: adhanPath,
         appPath: adhanPath,
@@ -300,6 +361,9 @@ cron.schedule("* * * * *", async () => {
 
     const location = store.get("location");
     const settings = store.get("settings") || {};
+
+    // Update tray title regardless of notification settings
+    updateTrayTitle();
 
     if (!settings.adhan_notifications) {
       return;
@@ -334,13 +398,13 @@ cron.schedule("* * * * *", async () => {
 
     if (prayerToCheck && mainPrayers.includes(prayerToCheck)) {
       let prayerTime = moment(prayerTimes.timeForPrayer(prayerToCheck));
-      
+
       // Apply prayer time corrections if they exist
       const corrections = settings.prayerTimeCorrections || {};
       if (corrections[prayerToCheck]) {
-        prayerTime = prayerTime.add(corrections[prayerToCheck], 'minutes');
+        prayerTime = prayerTime.add(corrections[prayerToCheck], "minutes");
       }
-      
+
       const now = moment();
 
       if (Math.abs(prayerTime.diff(now, "minutes")) <= 1) {
@@ -353,15 +417,145 @@ cron.schedule("* * * * *", async () => {
   }
 });
 
+// Desktop widgets window
+function createWidgetsWindow() {
+  if (widgetsWindow && !widgetsWindow.isDestroyed()) {
+    console.log("Widgets window already exists, showing it");
+    widgetsWindow.show();
+    return;
+  }
+
+  // Close existing window if destroyed
+  if (widgetsWindow) {
+    widgetsWindow.close();
+    widgetsWindow = null;
+  }
+
+  const widgets = store.get("widgets") || [];
+  if (widgets.length === 0) {
+    console.log("No widgets to display");
+    return;
+  }
+
+  console.log("Creating widgets window with", widgets.length, "widgets");
+
+  const { screen } = require("electron");
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
+  widgetsWindow = new BrowserWindow({
+    width: width,
+    height: height,
+    x: 0,
+    y: 0,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: false,
+    skipTaskbar: true,
+    resizable: false,
+    movable: false,
+    backgroundColor: "#00000000",
+    webPreferences: {
+      devTools: isDev, // Enable dev tools in dev mode for debugging
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+      backgroundThrottling: false,
+    },
+  });
+
+  const widgetsURL = isDev
+    ? "http://localhost:3000/?widgets=true"
+    : `file://${path.join(__dirname, "../build/index.html")}?widgets=true`;
+
+  console.log("Loading widgets URL:", widgetsURL);
+  widgetsWindow.loadURL(widgetsURL);
+
+  // Show the window
+  widgetsWindow.show();
+
+  // Wait for content to load before making it click-through
+  widgetsWindow.webContents.once("did-finish-load", () => {
+    console.log("Widgets window loaded");
+    // Don't make it click-through immediately - let React render first
+    // We'll make it click-through after React has rendered
+    // Temporarily disabled for debugging - uncomment after widgets are working
+    // setTimeout(() => {
+    //   if (widgetsWindow) {
+    //     console.log("Making widgets window click-through");
+    //     widgetsWindow.setIgnoreMouseEvents(true, { forward: true });
+    //   }
+    // }, 2000); // Longer delay to ensure React has rendered
+  });
+
+  // Also listen for DOM ready
+  widgetsWindow.webContents.once("dom-ready", () => {
+    console.log("Widgets window DOM ready");
+  });
+
+  widgetsWindow.webContents.on(
+    "did-fail-load",
+    (event, errorCode, errorDescription) => {
+      console.error(
+        "Widgets window failed to load:",
+        errorCode,
+        errorDescription
+      );
+    }
+  );
+
+  widgetsWindow.on("closed", () => {
+    console.log("Widgets window closed");
+    widgetsWindow = null;
+  });
+}
+
+function closeWidgetsWindow() {
+  if (widgetsWindow) {
+    widgetsWindow.close();
+    widgetsWindow = null;
+  }
+}
+
+// IPC handlers for widgets window
+ipcMain.handle("show-widgets-window", () => {
+  try {
+    createWidgetsWindow();
+    return true;
+  } catch (error) {
+    console.error("Error showing widgets window:", error);
+    return false;
+  }
+});
+
+ipcMain.handle("close-widgets-window", () => {
+  try {
+    closeWidgetsWindow();
+    return true;
+  } catch (error) {
+    console.error("Error closing widgets window:", error);
+    return false;
+  }
+});
+
 // Electron app event handlers
 app.on("ready", () => {
-if (process.platform === 'linux') {
-  // Enable wayland for linux
-  app.commandLine.appendSwitch('enable-features', 'UseOzonePlatform');
-  app.commandLine.appendSwitch('ozone-platform', 'wayland');
-  app.commandLine.appendSwitch('enable-wayland-ime');
-}
+  if (process.platform === "linux") {
+    // Enable wayland for linux
+    app.commandLine.appendSwitch("enable-features", "UseOzonePlatform");
+    app.commandLine.appendSwitch("ozone-platform", "wayland");
+    app.commandLine.appendSwitch("enable-wayland-ime");
+  }
   createMainWindow();
+
+  // Check if widgets exist and show widgets window
+  const widgets = store.get("widgets") || [];
+  console.log("App ready: Found", widgets.length, "widgets");
+  if (widgets.length > 0) {
+    // Wait a bit longer to ensure main window is fully loaded
+    setTimeout(() => {
+      createWidgetsWindow();
+    }, 1000);
+  }
 });
 
 app.on("window-all-closed", () => {
@@ -409,19 +603,22 @@ ipcMain.on("check-for-updates", () => {
     // In development mode, show a message that updates are not available
     mainWindow.webContents.send("update-check-result", {
       type: "dev-mode",
-      message: i18next.t("updates_disabled_dev", "Update checking is disabled in development mode")
+      message: i18next.t(
+        "updates_disabled_dev",
+        "Update checking is disabled in development mode"
+      ),
     });
     console.log("Update checking is disabled in development mode");
     return;
   }
-  
+
   try {
     // Notify that we're checking for updates
     mainWindow.webContents.send("update-check-result", {
       type: "checking",
-      message: i18next.t("checking_for_updates", "Checking for updates...")
+      message: i18next.t("checking_for_updates", "Checking for updates..."),
     });
-    
+
     autoUpdater.checkForUpdatesAndNotify();
     console.log("Checking for updates...");
   } catch (error) {
@@ -429,7 +626,7 @@ ipcMain.on("check-for-updates", () => {
     mainWindow.webContents.send("update-check-result", {
       type: "error",
       error: error,
-      message: i18next.t("update_error_message", "Failed to check for updates")
+      message: i18next.t("update_error_message", "Failed to check for updates"),
     });
   }
 });
@@ -459,37 +656,40 @@ ipcMain.handle("set-auto-launch", async (event, enabled) => {
 });
 
 // Progress tracking handlers
-ipcMain.handle("save-progress", (event, reciterId, surahId, currentTime, duration) => {
-  try {
-    const progressData = store.get("audioProgress") || {};
-    
-    // Create a unique key for reciter-surah combination
-    const key = `${reciterId}-${surahId}`;
-    
-    // Only save if there's meaningful progress (more than 10 seconds and not completed)
-    if (currentTime > 10 && currentTime < duration - 10) {
-      progressData[key] = {
-        currentTime,
-        duration,
-        percentage: Math.round((currentTime / duration) * 100),
-        lastPlayed: Date.now()
-      };
-      
-      store.set("audioProgress", progressData);
-      return true;
-    } else if (currentTime >= duration - 10) {
-      // Mark as completed if near the end
-      delete progressData[key];
-      store.set("audioProgress", progressData);
-      return true;
+ipcMain.handle(
+  "save-progress",
+  (event, reciterId, surahId, currentTime, duration) => {
+    try {
+      const progressData = store.get("audioProgress") || {};
+
+      // Create a unique key for reciter-surah combination
+      const key = `${reciterId}-${surahId}`;
+
+      // Only save if there's meaningful progress (more than 10 seconds and not completed)
+      if (currentTime > 10 && currentTime < duration - 10) {
+        progressData[key] = {
+          currentTime,
+          duration,
+          percentage: Math.round((currentTime / duration) * 100),
+          lastPlayed: Date.now(),
+        };
+
+        store.set("audioProgress", progressData);
+        return true;
+      } else if (currentTime >= duration - 10) {
+        // Mark as completed if near the end
+        delete progressData[key];
+        store.set("audioProgress", progressData);
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error saving progress:", error);
+      return false;
     }
-    
-    return false;
-  } catch (error) {
-    console.error("Error saving progress:", error);
-    return false;
   }
-});
+);
 
 ipcMain.handle("get-progress", (event, reciterId, surahId) => {
   try {
@@ -527,5 +727,141 @@ ipcMain.handle("clear-progress", (event, reciterId, surahId) => {
 ipcMain.on("playlists-updated", () => {
   if (mainWindow) {
     mainWindow.webContents.send("playlists-updated");
+  }
+});
+
+// Desktop overlay window for widget placement
+function createOverlayWindow(widgetData) {
+  if (overlayWindow) {
+    overlayWindow.focus();
+    return;
+  }
+
+  const { screen } = require("electron");
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
+  overlayWindow = new BrowserWindow({
+    width: width,
+    height: height,
+    x: 0,
+    y: 0,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: false,
+    movable: false,
+    focusable: true,
+    backgroundColor: "#00000000", // Fully transparent background
+    webPreferences: {
+      devTools: false,
+      preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
+      backgroundThrottling: false,
+    },
+  });
+
+  const overlayURL = isDev
+    ? `http://localhost:3000/?overlay=true&widget=${encodeURIComponent(JSON.stringify(widgetData))}`
+    : `file://${path.join(__dirname, "../build/index.html")}?overlay=true&widget=${encodeURIComponent(JSON.stringify(widgetData))}`;
+
+  overlayWindow.loadURL(overlayURL);
+  overlayWindow.setIgnoreMouseEvents(false);
+
+  overlayWindow.once("ready-to-show", () => {
+    overlayWindow.focus();
+  });
+
+  overlayWindow.on("closed", () => {
+    overlayWindow = null;
+  });
+
+  // Minimize main window when overlay is shown
+  if (mainWindow) {
+    mainWindow.minimize();
+  }
+}
+
+function closeOverlayWindow() {
+  if (overlayWindow) {
+    overlayWindow.close();
+    overlayWindow = null;
+  }
+
+  // Restore main window
+  if (mainWindow) {
+    mainWindow.restore();
+    mainWindow.focus();
+  }
+}
+
+// IPC handlers for overlay window
+ipcMain.handle("show-desktop-overlay", (event, widgetData) => {
+  try {
+    createOverlayWindow(widgetData);
+    return true;
+  } catch (error) {
+    console.error("Error showing desktop overlay:", error);
+    return false;
+  }
+});
+
+ipcMain.handle("close-desktop-overlay", () => {
+  try {
+    closeOverlayWindow();
+    return true;
+  } catch (error) {
+    console.error("Error closing desktop overlay:", error);
+    return false;
+  }
+});
+
+ipcMain.on("widget-position-selected", (event, position) => {
+  // Send position back to main window
+  if (mainWindow) {
+    mainWindow.webContents.send("widget-position-selected", position);
+  }
+  closeOverlayWindow();
+});
+
+ipcMain.on("widget-overlay-cancelled", () => {
+  closeOverlayWindow();
+});
+
+// Get desktop wallpaper path
+ipcMain.handle("get-desktop-wallpaper", async () => {
+  try {
+    const { getWallpaper } = await import("wallpaper");
+    const wallpaperPath = await getWallpaper();
+    return wallpaperPath || null;
+  } catch (error) {
+    console.error("Error getting desktop wallpaper:", error);
+    return null;
+  }
+});
+
+// Get desktop wallpaper as data URL (for better compatibility)
+ipcMain.handle("get-desktop-wallpaper-data-url", async () => {
+  try {
+    const { getWallpaper } = await import("wallpaper");
+    const wallpaperPath = await getWallpaper();
+    if (!wallpaperPath) {
+      return null;
+    }
+    
+    // Use nativeImage to load and convert to data URL
+    const image = nativeImage.createFromPath(wallpaperPath);
+    if (image.isEmpty()) {
+      console.error("Failed to load wallpaper image");
+      return null;
+    }
+    
+    // Convert to data URL
+    const dataURL = image.toDataURL();
+    return dataURL;
+  } catch (error) {
+    console.error("Error getting desktop wallpaper as data URL:", error);
+    return null;
   }
 });

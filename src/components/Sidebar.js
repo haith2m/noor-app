@@ -14,6 +14,8 @@ import {
   IconHeadphonesFilled,
   IconHeadphones,
   IconInfoCircle,
+  IconLayoutGrid,
+  IconLayoutGridFilled,
 } from "@tabler/icons-react";
 import AppIcon from "./AppIcon";
 
@@ -24,6 +26,7 @@ function Sidebar() {
   const pages = [
     {
       name: "home",
+      condition: currentPage === "home",
       icon: currentPage.includes("home") ? (
         <IconHomeFilled size={24} />
       ) : (
@@ -32,6 +35,7 @@ function Sidebar() {
     },
     {
       name: "quran-audio",
+      condition: currentPage.startsWith("quran-audio") || currentPage.startsWith("playlist-"),
       icon: currentPage.startsWith("quran-audio") || currentPage.startsWith("playlist-") ? (
         <IconHeadphonesFilled size={24} />
       ) : (
@@ -40,6 +44,7 @@ function Sidebar() {
     },
     {
       name: "quran",
+      condition: currentPage === "quran",
       icon:
         currentPage === "quran" ? (
           <IconBookFilled size={24} />
@@ -49,6 +54,7 @@ function Sidebar() {
     },
     {
       name: "azkar",
+      condition: currentPage.includes("azkar"),
       icon: (
         <AzkarIcon
           filled={currentPage.includes("azkar")}
@@ -59,10 +65,20 @@ function Sidebar() {
     },
     {
       name: "calendar",
+      condition: currentPage.includes("calendar"),
       icon: currentPage.includes("calendar") ? (
         <IconCalendarFilled size={24} />
       ) : (
         <IconCalendar size={24} />
+      ),
+    },
+    {
+      name: "widgets",
+      condition: currentPage === "widgets",
+      icon: currentPage === "widgets" ? (
+        <IconLayoutGridFilled size={24} />
+      ) : (
+        <IconLayoutGrid size={24} />
       ),
     },
   ];
@@ -74,23 +90,18 @@ function Sidebar() {
   return (
     <>
       <div
-        className={`w-16 select-none flex flex-col items-center justify-between h-screen fixed bg-bg-color-2 border-e border-bg-color-3 p-4 slideIn`}
+        className={`w-16 select-none flex flex-col items-center justify-between h-screen fixed bg-bg-color-2 border-e border-bg-color-3 p-4 slideIn z-50`}
       >
         <div className={`flex flex-col gap-2`}>
           <div className={`w-12 h-12 flex items-center justify-center`}>
             <AppIcon />
           </div>
-          {pages.map(({ name, icon }) => {
+          {pages.map(({ name, icon, condition }) => {
             return (
               <div key={name}>
                 <button
                   className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
-                    (name === "quran-audio" &&
-                      (currentPage.startsWith("quran-audio") || currentPage.startsWith("playlist-"))) ||
-                    (name === "quran" && currentPage === "quran") ||
-                    (name !== "quran" &&
-                      name !== "quran-audio" &&
-                      currentPage.includes(name))
+                    condition
                       ? `bg-${window.api.getColor()}-500/20 text-${window.api.getColor()}-500`
                       : "bg-bg-color-3 text-text"
                   }`}

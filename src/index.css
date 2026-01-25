@@ -4,22 +4,22 @@
 
 @font-face {
   font-family: "SF-Pro";
-  src: url("../public/fonts/SF-Pro.ttf");
+  src: url("../public/assets/fonts/SF-Pro.ttf");
 }
 
 @font-face {
   font-family: "SF-Arabic";
-  src: url("../public/fonts/SFArabic-Regular.ttf");
+  src: url("../public/assets/fonts/SFArabic-Regular.ttf");
 }
 
 @font-face {
   font-family: "Naskh";
-  src: url("../public/fonts/UthmanTN_v2-0.ttf");
+  src: url("../public/assets/fonts/UthmanTN_v2-0.ttf");
 }
 
 @font-face {
   font-family: "Hafs";
-  src: url("../public/fonts/UthmanicHafs.ttf");
+  src: url("../public/assets/fonts/UthmanicHafs.ttf");
 }
 
 :root {
@@ -51,8 +51,12 @@
   font-family: "Naskh";
 }
 
-.ayah {
-  font-family: "Hafs";
+.react-quran_surah-title {
+  scale: 1.5;
+}
+
+.react-quran_ayah-word,.react-quran_ayah-marker {
+  font-family: "Hafs" !important;
   font-size: 1.5rem;
   line-height: 1.5;
   text-align: right;
@@ -60,6 +64,24 @@
   margin: 0;
 }
 
+/* Ayah hover effects */
+span[data-verse] {
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  display: inline-block;
+  position: relative;
+}
+
+span[data-verse].ayah-hovered {
+  color: var(--ayah-hover-color, #3b82f6) !important;
+}
+
+span[data-verse].ayah-hovered * {
+  color: var(--ayah-hover-color, #3b82f6) !important;
+}
 
 
 html,body {
@@ -88,7 +110,7 @@ code {
   mask-image: linear-gradient(180deg, #000000 40%, transparent);
   -webkit-mask-image: linear-gradient(180deg, #000000 40%, transparent);
   background-repeat: no-repeat;
-  background-image: url("../public/Mosque.svg");
+  background-image: url("../public/assets/icons/Mosque.svg");
   background-size: cover;
   background-position: center;
   z-index: -1;
@@ -96,6 +118,33 @@ code {
 
 ::-webkit-scrollbar {
   display: none;
+}
+
+/* Widget scrollbar styling */
+.widget-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-color-3) var(--bg-color-2);
+}
+
+.widget-scrollbar::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+}
+
+.widget-scrollbar::-webkit-scrollbar-track {
+  background: var(--bg-color-2);
+  border-radius: 4px;
+}
+
+.widget-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--bg-color-3);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.widget-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--bg-color-3);
+  opacity: 0.8;
 }
 
 @keyframes fadeIn {
@@ -148,6 +197,10 @@ code {
   animation-duration: 150ms;
 }
 
+.animate-slide-in {
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(100%);
@@ -161,7 +214,11 @@ code {
   animation: slideUp;
   animation-fill-mode: forwards;
   animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  animation-duration: 150ms;
+  animation-duration: 300ms;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 @keyframes slideDown {
@@ -182,6 +239,12 @@ code {
 
 .disabled {
   pointer-events: none;
+}
+
+/* Widget theme variables - widgets use their own theme, not app theme */
+/* CSS variables set via inline styles automatically cascade to children */
+
+.disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }

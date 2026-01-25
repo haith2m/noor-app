@@ -12,7 +12,7 @@ i18n
     supportedLngs: ["en", "ar"],
 
     backend: {
-      loadPath: `${process.env.PUBLIC_URL}/{{lng}}.json`,
+      loadPath: `${process.env.PUBLIC_URL}/locales/{{lng}}.json`,
     },
     react: {
       useSuspense: false,
