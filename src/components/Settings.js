@@ -18,7 +18,15 @@ const Settings = () => {
   const { t } = useTranslation();
   const { settings, editSettings, currentPage, setCurrentPage, audioState } = usePage();
 
-  const [updatedSettings, setUpdatedSettings] = useState(settings);
+  // Initialize hardware_acceleration if undefined (default: enabled on Mac, disabled on Windows/Linux)
+  const initializedSettings = {
+    ...settings,
+    hardware_acceleration: settings.hardware_acceleration !== undefined 
+      ? settings.hardware_acceleration 
+      : (navigator.platform.toUpperCase().indexOf('MAC') >= 0)
+  };
+
+  const [updatedSettings, setUpdatedSettings] = useState(initializedSettings);
   const [settingsChanged, setSettingsChanged] = useState(false);
   const [updateStatus, setUpdateStatus] = useState(null);
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
@@ -47,8 +55,14 @@ const Settings = () => {
     : "appearance";
 
   useEffect(() => {
+    const currentSettings = {
+      ...settings,
+      hardware_acceleration: settings.hardware_acceleration !== undefined 
+        ? settings.hardware_acceleration 
+        : (navigator.platform.toUpperCase().indexOf('MAC') >= 0)
+    };
     setSettingsChanged(
-      JSON.stringify(settings) !== JSON.stringify(updatedSettings)
+      JSON.stringify(currentSettings) !== JSON.stringify(updatedSettings)
     );
   }, [settings, updatedSettings]);
 
@@ -165,7 +179,13 @@ const Settings = () => {
   };
 
   const discardChanges = () => {
-    setUpdatedSettings(settings);
+    const currentSettings = {
+      ...settings,
+      hardware_acceleration: settings.hardware_acceleration !== undefined 
+        ? settings.hardware_acceleration 
+        : (navigator.platform.toUpperCase().indexOf('MAC') >= 0)
+    };
+    setUpdatedSettings(currentSettings);
     setSettingsChanged(false);
   };
 
@@ -805,6 +825,45 @@ const Settings = () => {
                 <div
                   className={`w-6 h-6 rounded-full bg-text transition-all ${
                     updatedSettings.run_on_startup ? "ms-8" : "me-8"
+                  }`}
+                ></div>
+              </button>
+            </div>
+          </div>
+
+          <div
+            id="setting-hardware_acceleration"
+            data-section="app_settings"
+            className={`flex flex-col p-2 rounded-md transition-colors`}
+          >
+            <div className="flex flex-row items-center gap-2">
+              <h2 className={`text-lg font-medium text-start`}>
+                {t("hardware_acceleration")}
+              </h2>
+              <Tooltip message={t("hardware_acceleration_mac_note")}>
+                <IconInfoCircle size={16} className="text-text-2 hover:text-text transition-colors" />
+              </Tooltip>
+            </div>
+            <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
+              {t("hardware_acceleration_description")}
+            </p>
+            <div className="flex flex-row items-center gap-4">
+              <button
+                onClick={() =>
+                  handleChange(
+                    "hardware_acceleration",
+                    updatedSettings.hardware_acceleration !== false ? false : true
+                  )
+                }
+                className={`w-16 h-8 transition-all ${
+                  updatedSettings.hardware_acceleration !== false
+                    ? `bg-${window.api.getColor()}-500 border-${window.api.getColor()}-500`
+                    : "bg-bg-color-2 border-bg-color-3"
+                } rounded-full border-2 flex items-center justify-center relative`}
+              >
+                <div
+                  className={`w-6 h-6 rounded-full bg-text transition-all ${
+                    updatedSettings.hardware_acceleration !== false ? "ms-8" : "me-8"
                   }`}
                 ></div>
               </button>

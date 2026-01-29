@@ -13,28 +13,39 @@ function TafsirPanel({
   tafsirLoading,
   tafsirError,
   onRefresh,
+  surahs = [],
 }) {
   const { t, i18n } = useTranslation();
   const color = window.api.getColor?.() || "blue";
 
+  const getSurahName = (chapterNumber) => {
+    const surah = surahs.find((s) => s.id === chapterNumber);
+    return surah?.name || `سورة ${chapterNumber}`;
+  };
+
   if (!tafsirOpen) return null;
 
   return (
-    <div className="w-[26rem] border-l border-bg-color-3 bg-bg-color/60 h-full flex flex-col animate-slide-in">
-      <div className="p-4 border-b border-bg-color-3 flex items-center justify-between">
+    <>
+      <div 
+        className="absolute inset-0 bg-black/40 z-40 animate-fade-in"
+        onClick={onClose}
+      />
+      <div className="absolute top-0 bottom-0 left-0 w-[400px] z-50 bg-black/50 backdrop-blur-sm border-r border-bg-color-3 flex flex-col overflow-hidden shadow-2xl animate-slide-in-from-left">
+      <div className="p-4 border-b border-bg-color-3 flex items-center justify-between bg-black/50 flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <IconBook2 size={18} className={`text-${color}-500 shrink-0`} />
           <div className="min-w-0">
             <div className="font-medium truncate">{t("tafsir")}</div>
             <div className="text-xs text-text-2">
-              {selectedVerse ? `سورة ${selectedVerse.chapter} • آية ${selectedVerse.verse}` : "اضغط على آية"}
+              {selectedVerse ? `${getSurahName(selectedVerse.chapter)} • آية ${selectedVerse.verse}` : "اضغط على آية"}
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <button
-            className="p-2 rounded hover:bg-bg-color-2"
+            className="p-2 rounded hover:bg-black/30"
             onClick={onRefresh}
             disabled={!selectedVerse}
             title="تحديث"
@@ -42,7 +53,7 @@ function TafsirPanel({
             <IconRefresh size={16} />
           </button>
           <button
-            className="p-2 rounded hover:bg-bg-color-2"
+            className="p-2 rounded hover:bg-black/30"
             onClick={onClose}
             title="إغلاق"
           >
@@ -51,9 +62,9 @@ function TafsirPanel({
         </div>
       </div>
 
-      <div className="p-4 border-b border-bg-color-3">
+      <div className="p-4 border-b border-bg-color-3 bg-black/50 flex-shrink-0">
         <select
-          className="w-full bg-bg-color-2 border border-bg-color-3 rounded px-3 py-2 text-sm"
+          className="w-full bg-black/30 border border-bg-color-3 rounded px-3 py-2 text-sm"
           value={tafsirId ?? ""}
           onChange={(e) => onTafsirIdChange(Number(e.target.value))}
         >
@@ -76,7 +87,7 @@ function TafsirPanel({
         </select>
       </div>
 
-      <div className="p-4 overflow-y-auto flex-1">
+      <div className="p-4 overflow-y-auto flex-1 bg-black/50">
         {!selectedVerse ? (
           <div className="text-sm text-text-2">اضغط على آية لعرض التفسير</div>
         ) : tafsirLoading ? (
@@ -94,6 +105,7 @@ function TafsirPanel({
         )}
       </div>
     </div>
+    </>
   );
 }
 

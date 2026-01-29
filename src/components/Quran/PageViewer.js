@@ -10,6 +10,7 @@ function PageViewer({
   onPageClick,
   pageViewerRef,
   onPageChange,
+  tafsirOpen = false,
 }) {
   const isScrollingRef = useRef(false);
 

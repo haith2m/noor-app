@@ -391,18 +391,7 @@ function Quran() {
         surahIndicatorRef={surahIndicatorRef}
       />
 
-      <div className="flex-1 min-h-0 flex overflow-hidden">
-        <PageViewer
-          allPagesInSurah={allPagesInSurah}
-          scale={scale}
-          currentPage={currentPage}
-          selectedSurah={selectedSurah}
-          surahRange={surahRange}
-          onPageClick={handlePageClick}
-          pageViewerRef={pageViewerRef}
-          onPageChange={handlePageChange}
-        />
-
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
         <TafsirPanel
           tafsirOpen={tafsirOpen}
           onClose={() => setTafsirOpen(false)}
@@ -414,6 +403,18 @@ function Quran() {
           tafsirLoading={tafsirLoading}
           tafsirError={tafsirError}
           onRefresh={handleRefreshTafsirCache}
+          surahs={surahs}
+        />
+        <PageViewer
+          allPagesInSurah={allPagesInSurah}
+          scale={scale}
+          currentPage={currentPage}
+          selectedSurah={selectedSurah}
+          surahRange={surahRange}
+          onPageClick={handlePageClick}
+          pageViewerRef={pageViewerRef}
+          onPageChange={handlePageChange}
+          tafsirOpen={tafsirOpen}
         />
       </div>
     </div>

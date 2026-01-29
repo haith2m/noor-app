@@ -23,6 +23,20 @@ const store = new Store();
 
 const settings = store.get("settings") || {};
 
+// Set default hardware acceleration based on platform
+// Enabled by default on Mac, disabled on Windows and Linux
+if (settings.hardware_acceleration === undefined) {
+  const defaultHardwareAcceleration = process.platform === "darwin"; // Mac
+  settings.hardware_acceleration = defaultHardwareAcceleration;
+  store.set("settings", settings);
+}
+
+// Disable hardware acceleration if setting is false
+// This must be called before app.ready()
+if (!settings.hardware_acceleration) {
+  app.disableHardwareAcceleration();
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -56,8 +70,6 @@ let overlayWindow = null;
 let widgetsWindow = null;
 let tray = null;
 
-app.disableHardwareAcceleration();
-
 function getIcon(filename, extension) {
   const ext = extension || (process.platform === "linux" ? "png" : "ico");
   const devPath = path.join(
@@ -80,8 +92,9 @@ function updateTrayTitle() {
     const location = store.get("location");
     const settings = store.get("settings") || {};
 
+
     if (!location || !location.latitude || !location.longitude) {
-      tray.setTitle("");
+      tray.setTitle("--:--");
       return;
     }
 
@@ -89,50 +102,84 @@ function updateTrayTitle() {
     const method = settings.calculationMethod || "UmmAlQura";
     const params = CalculationMethod[method]();
 
-    // Calculate prayer times
-    let prayerTimes;
+    const corrections = settings.prayerTimeCorrections || {};
+    const mainPrayers = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+
+    const applyCorrection = (prayerKey, m) => {
+      const minutes = Number(corrections[prayerKey] || 0);
+      return minutes ? m.clone().add(minutes, "minutes") : m;
+    };
+
+    const now = moment();
+
+
+    let todayTimes;
     try {
-      prayerTimes = new PrayerTimes(coordinates, new Date(), params);
+      todayTimes = new PrayerTimes(coordinates, new Date(), params);
     } catch (error) {
       console.error("Error calculating prayer times for tray:", error);
-      tray.setTitle("");
+      tray.setTitle("--:--");
       return;
     }
 
-    const nextPrayer = prayerTimes.nextPrayer();
+    let chosenPrayer = null;
+    let chosenTime = null;
 
-    // Only show main prayers (skip sunrise, sunset, none)
-    const mainPrayers = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+    for (const p of mainPrayers) {
+      const t = applyCorrection(p, moment(todayTimes.timeForPrayer(p)));
+      if (t.isAfter(now)) {
+        chosenPrayer = p;
+        chosenTime = t;
+        break;
+      }
+    }
 
-    if (nextPrayer && mainPrayers.includes(nextPrayer)) {
-      let prayerTime = moment(prayerTimes.timeForPrayer(nextPrayer));
 
-      // Apply prayer time corrections if they exist
-      const corrections = settings.prayerTimeCorrections || {};
-      if (corrections[nextPrayer]) {
-        prayerTime = prayerTime.add(corrections[nextPrayer], "minutes");
+    if (!chosenPrayer) {
+      const tomorrow = moment().add(1, "day").toDate();
+      let tomorrowTimes;
+      try {
+        tomorrowTimes = new PrayerTimes(coordinates, tomorrow, params);
+      } catch (error) {
+        console.error("Error calculating tomorrow prayer times for tray:", error);
+        tray.setTitle("--:--");
+        return;
       }
 
-      // Capitalize first letter of prayer name
-      const prayerName =
-        nextPrayer.charAt(0).toUpperCase() + nextPrayer.slice(1);
-
-      // Format time as "H:mm" (24-hour format, e.g., "5:26")
-      const timeString = prayerTime.format("H:mm");
-
-      // Set tray title: "Fajr 5:26"
-      tray.setTitle(`${prayerName} ${timeString}`);
-    } else {
-      tray.setTitle("");
+      chosenPrayer = "fajr";
+      chosenTime = applyCorrection("fajr", moment(tomorrowTimes.timeForPrayer("fajr")));
     }
+
+
+    const prayerName = (i18next && i18next.t) ? i18next.t(chosenPrayer) : chosenPrayer;
+    const timeString = chosenTime.format("H:mm");
+
+
+    tray.setTitle(`${prayerName.replace("صلاة", "")} ${timeString}`);
   } catch (error) {
     console.error("Error updating tray title:", error);
-    tray.setTitle("");
+    tray.setTitle("--:--");
   }
 }
 
 function createTray() {
-  tray = new Tray(getIcon("icon", "png"));
+  const icon = nativeImage.createFromPath(getIcon("icon", "png"));
+  let trayIcon = icon;
+
+  // specific modifications for macos
+  if (process.platform === "darwin") {
+    // resize the icon since macos doesn't automatically resize it
+    trayIcon = icon.resize({
+      width: 32,
+      quality: "best",
+    });
+
+    // turn the image into a template image
+    // a template image is an image whose color is dynamic depending on the theme of the device
+    trayIcon.setTemplateImage(true);
+  }
+
+  tray = new Tray(trayIcon);
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -162,6 +209,7 @@ function createTray() {
       },
     },
   ]);
+
 
   tray.setToolTip("Noor");
   tray.setContextMenu(contextMenu);
@@ -452,9 +500,12 @@ function createWidgetsWindow() {
     transparent: true,
     alwaysOnTop: false,
     skipTaskbar: true,
+    focusable: false,
     resizable: false,
+    fullscreen: false,
+    fullscreenable: false,
+    hasShadow: false,
     movable: false,
-    backgroundColor: "#00000000",
     webPreferences: {
       devTools: isDev, // Enable dev tools in dev mode for debugging
       preload: path.join(__dirname, "preload.js"),
@@ -462,6 +513,8 @@ function createWidgetsWindow() {
       backgroundThrottling: false,
     },
   });
+
+  widgetsWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
 
   const widgetsURL = isDev
     ? "http://localhost:3000/?widgets=true"
@@ -471,20 +524,18 @@ function createWidgetsWindow() {
   widgetsWindow.loadURL(widgetsURL);
 
   // Show the window
+  widgetsWindow.setIgnoreMouseEvents(true, { forward: true });
   widgetsWindow.show();
 
   // Wait for content to load before making it click-through
   widgetsWindow.webContents.once("did-finish-load", () => {
     console.log("Widgets window loaded");
-    // Don't make it click-through immediately - let React render first
-    // We'll make it click-through after React has rendered
-    // Temporarily disabled for debugging - uncomment after widgets are working
-    // setTimeout(() => {
-    //   if (widgetsWindow) {
-    //     console.log("Making widgets window click-through");
-    //     widgetsWindow.setIgnoreMouseEvents(true, { forward: true });
-    //   }
-    // }, 2000); // Longer delay to ensure React has rendered
+    setTimeout(() => {
+      if (widgetsWindow) {
+        console.log("Making widgets window click-through");
+        widgetsWindow.setIgnoreMouseEvents(true, { forward: true });
+      }
+    }, 2000); // Longer delay to ensure React has rendered
   });
 
   // Also listen for DOM ready
@@ -752,8 +803,9 @@ function createOverlayWindow(widgetData) {
     skipTaskbar: true,
     resizable: false,
     movable: false,
-    focusable: true,
-    backgroundColor: "#00000000", // Fully transparent background
+    focusable: false,
+    fullscreen: false,
+    fullscreenable: false,
     webPreferences: {
       devTools: false,
       preload: path.join(__dirname, "preload.js"),
@@ -849,14 +901,14 @@ ipcMain.handle("get-desktop-wallpaper-data-url", async () => {
     if (!wallpaperPath) {
       return null;
     }
-    
+
     // Use nativeImage to load and convert to data URL
     const image = nativeImage.createFromPath(wallpaperPath);
     if (image.isEmpty()) {
       console.error("Failed to load wallpaper image");
       return null;
     }
-    
+
     // Convert to data URL
     const dataURL = image.toDataURL();
     return dataURL;
