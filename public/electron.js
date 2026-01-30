@@ -469,7 +469,7 @@ cron.schedule("* * * * *", async () => {
 function createWidgetsWindow() {
   if (widgetsWindow && !widgetsWindow.isDestroyed()) {
     console.log("Widgets window already exists, showing it");
-    widgetsWindow.show();
+    widgetsWindow.showInactive();
     return;
   }
 
@@ -500,7 +500,8 @@ function createWidgetsWindow() {
     transparent: true,
     alwaysOnTop: false,
     skipTaskbar: true,
-    focusable: false,
+    hiddenInMissionControl: true,
+    // focusable: false,
     resizable: false,
     fullscreen: false,
     fullscreenable: false,
@@ -515,6 +516,10 @@ function createWidgetsWindow() {
   });
 
   widgetsWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false, skipTransformProcessType: true })
+
+  if (process.platform === 'darwin') {
+    widgetsWindow.setAlwaysOnTop(true, -20)
+  }
   const widgetsURL = isDev
     ? "http://localhost:3000/?widgets=true"
     : `file://${path.join(__dirname, "../build/index.html")}?widgets=true`;
@@ -524,7 +529,7 @@ function createWidgetsWindow() {
 
   // Show the window
   widgetsWindow.setIgnoreMouseEvents(true, { forward: true });
-  widgetsWindow.show();
+  widgetsWindow.showInactive();
 
   // Wait for content to load before making it click-through
   widgetsWindow.webContents.once("did-finish-load", () => {
