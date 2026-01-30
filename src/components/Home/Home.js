@@ -4,14 +4,24 @@ import { useTranslation } from "react-i18next";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import i18n from "../../i18n";
-import { IconRotateClockwise } from "@tabler/icons-react";
+import { IconRotateClockwise, IconCheck, IconCircle, IconCloud } from "@tabler/icons-react";
 import NawafilModal from "./NawafilModal";
+import TodoList from "./TodoList";
+import { usePage } from "../../PageContext";
 
 function Times({ prayersData }) {
   const { t } = useTranslation();
+  const { settings } = usePage();
   const [remainingTimes, setRemainingTimes] = useState({});
   const [randomZikr, setRandomZikr] = useState(null);
   const [azkarPath, setAzkarPath] = useState("");
+  const [prayersCompleted, setPrayersCompleted] = useState({
+    fajr: false,
+    dhuhr: false,
+    asr: false,
+    maghrib: false,
+    isha: false,
+  });
 
   useEffect(() => {
     const fetchPath = async () => {
@@ -76,8 +86,50 @@ function Times({ prayersData }) {
     // eslint-disable-next-line
   }, [azkarPath]);
 
+  // Load saved prayer completion from localStorage
+  useEffect(() => {
+    const today = moment().format("YYYY-MM-DD");
+    const savedData = localStorage.getItem(`todo_${today}`);
+    
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData);
+        if (data.prayersCompleted) {
+          setPrayersCompleted(data.prayersCompleted);
+        }
+      } catch (error) {
+        console.error("Error loading prayer completion data:", error);
+      }
+    }
+  }, []);
+
+  // Handle prayer toggle
+  const handlePrayerToggle = (prayer) => {
+    const newPrayersCompleted = {
+      ...prayersCompleted,
+      [prayer]: !prayersCompleted[prayer],
+    };
+    setPrayersCompleted(newPrayersCompleted);
+    
+    // Save to localStorage
+    const today = moment().format("YYYY-MM-DD");
+    const savedData = localStorage.getItem(`todo_${today}`);
+    let data = {};
+    if (savedData) {
+      try {
+        data = JSON.parse(savedData);
+      } catch (error) {
+        console.error("Error parsing saved data:", error);
+      }
+    }
+    data.prayersCompleted = newPrayersCompleted;
+    data.date = today;
+    localStorage.setItem(`todo_${today}`, JSON.stringify(data));
+  };
+
   return (
-    <div className={`pt-8 fadeIn h-fit bg-transparent `}>
+    <div className={`pt-2 fadeIn h-fit bg-transparent `}>
+            <TodoList prayersData={prayersData} />
       <div className={`flex flex-col`} id="prayer-times">
         <div className="flex flex-row items-center justify-between pe-4">
           <h1 className={`text-xl font-medium text-text px-4 text-start`}>
@@ -92,7 +144,7 @@ function Times({ prayersData }) {
             .map(([prayer, { time, icon }]) => (
               <div
                 key={prayer}
-                className={`flex flex-row items-start justify-between relative p-2 bg-bg-color-2 ${
+                className={`flex flex-row items-center justify-between relative p-2 bg-bg-color-2 ${
                   prayersData.nextPrayer === prayer
                     ? `col-span-2 bg-${window.api.getColor()}-500/25 border border-${window.api.getColor()}-500`
                     : "border border-bg-color-3"
@@ -122,19 +174,35 @@ function Times({ prayersData }) {
                     </h1>
                   </div>
                 </div>
-                {prayersData.nextPrayer === prayer &&
-                  remainingTimes[prayer] && (
-                    <p
-                      className={`text-base font-medium text-text text-start flex gap-2 items-center p-4`}
-                    >
-                      {t("after")}{" "}
-                      <span className={`text-${window.api.getColor()}-500`}>
-                        {remainingTimes[prayer]}
-                      </span>
-                    </p>
-                  )}
+                <div className="flex flex-row items-center">
+                  {prayersData.nextPrayer === prayer &&
+                    remainingTimes[prayer] && (
+                      <p
+                        className={`text-base font-medium text-text text-start flex gap-2 items-center p-4`}
+                      >
+                        {t("after")}{" "}
+                        <span className={`text-${window.api.getColor()}-500`}>
+                          {remainingTimes[prayer]}
+                        </span>
+                      </p>
+                    )}
+                  <button
+                    onClick={() => handlePrayerToggle(prayer)}
+                    className={`p-2 transition-all duration-200 hover:scale-110 active:scale-95 text-${window.api.getColor()}-500`}
+                    aria-label={prayersCompleted[prayer] ? "Mark as incomplete" : "Mark as complete"}
+                  >
+                    {prayersCompleted[prayer] ? (
+                      <IconCheck size={24} strokeWidth={2.5} />
+                    ) : (
+                      <IconCircle size={24} strokeWidth={2} />
+                    )}
+                  </button>
+                </div>
               </div>
             ))}
+            <p className={`text-sm text-text-2 text-start col-span-2`}>
+              * {t("prayer_times_note")}
+            </p>
         </div>
       </div>
       {randomZikr && randomZikr.content && (

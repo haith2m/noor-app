@@ -514,8 +514,7 @@ function createWidgetsWindow() {
     },
   });
 
-  widgetsWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false })
-
+  widgetsWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: false, skipTransformProcessType: true })
   const widgetsURL = isDev
     ? "http://localhost:3000/?widgets=true"
     : `file://${path.join(__dirname, "../build/index.html")}?widgets=true`;

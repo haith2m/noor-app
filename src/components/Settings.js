@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { usePage } from "../PageContext";
 import Tooltip from "./Tooltip";
 import LocationSearch from "./LocationSearch";
+import { Coordinates, CalculationMethod, Madhab, PrayerTimes } from "adhan";
+import moment from "moment";
 import {
   IconClock,
   IconInfoCircle,
@@ -12,10 +14,12 @@ import {
   IconBrandGithubFilled,
   IconChevronDown,
   IconLayoutDashboard,
+  IconCloud,
+  IconCheck,
 } from "@tabler/icons-react";
 
 const Settings = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { settings, editSettings, currentPage, setCurrentPage, audioState } = usePage();
 
   // Initialize hardware_acceleration if undefined (default: enabled on Mac, disabled on Windows/Linux)
@@ -48,6 +52,7 @@ const Settings = () => {
     };
   });
   const [widgetSettingsChanged, setWidgetSettingsChanged] = useState(false);
+  const [asrTimes, setAsrTimes] = useState({ shafi: null, hanafi: null });
 
   // Extract current section from currentPage (e.g., "settings-location" -> "location")
   const currentSection = currentPage.startsWith("settings-") 
@@ -89,6 +94,37 @@ const Settings = () => {
       try {
         const locationData = await window.api.getLocationData();
         setCurrentLocation(locationData);
+        
+        // Calculate Asr times for both methods
+        if (locationData && locationData.latitude && locationData.longitude) {
+          const coordinates = new Coordinates(locationData.latitude, locationData.longitude);
+          const calculationMethod = updatedSettings.calculationMethod || "UmmAlQura";
+          const date = new Date();
+          
+          const shafiParams = CalculationMethod[calculationMethod]();
+          shafiParams.madhab = Madhab.Shafi;
+          const shafiAsrTimes = new PrayerTimes(coordinates, date, shafiParams);
+          
+          const hanafiParams = CalculationMethod[calculationMethod]();
+          hanafiParams.madhab = Madhab.Hanafi;
+          const hanafiAsrTimes = new PrayerTimes(coordinates, date, hanafiParams);
+          
+          // Apply corrections
+          const corrections = updatedSettings.prayerTimeCorrections || {};
+          const applyCorrection = (time) => {
+            if (corrections.asr) {
+              const corrected = new Date(time);
+              corrected.setMinutes(corrected.getMinutes() + corrections.asr);
+              return corrected;
+            }
+            return time;
+          };
+          
+          setAsrTimes({
+            shafi: applyCorrection(shafiAsrTimes.asr),
+            hanafi: applyCorrection(hanafiAsrTimes.asr),
+          });
+        }
       } catch (error) {
         console.error("Error fetching location data:", error);
       }
@@ -117,7 +153,7 @@ const Settings = () => {
         window.api.removeListener("update-check-result", handleUpdateResult);
       }
     };
-  }, []);
+  }, [updatedSettings.calculationMethod, updatedSettings.prayerTimeCorrections]);
 
   const handleChange = (key, value) => {
     setUpdatedSettings((prev) => ({ ...prev, [key]: value }));
@@ -525,7 +561,7 @@ const Settings = () => {
           <div
             id="setting-prayer_time_correction"
             data-section="prayer_times"
-            className={`flex flex-col p-2 rounded-md transition-colors col-span-2`}
+            className={`flex flex-col p-2 rounded-md transition-colors`}
           >
             <h2 className={`text-lg font-medium text-start`}>
               {t("prayer_time_correction")}
@@ -577,6 +613,79 @@ const Settings = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="setting-asrCalculationMethod"
+            data-section="prayer_times"
+            className={`flex flex-col p-2 rounded-md transition-colors`}
+          >
+            <h2 className={`text-lg font-medium text-start`}>
+              {t("asr_calculation_method")}
+            </h2>
+            <p className={`text-sm text-start text-text-2 pt-1 pb-2`}>
+              {t("asr_calculation_method_description")}
+            </p>
+            <div className={`flex flex-col gap-2`}>
+              <div 
+                onClick={() => handleChange("asrCalculationMethod", "Shafi")}
+                className={`flex flex-col gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
+                  updatedSettings.asrCalculationMethod === "Shafi" || !updatedSettings.asrCalculationMethod
+                    ? `border-${window.api.getColor()}-500 bg-bg-color-2`
+                    : "border-bg-color-3 bg-bg-color-2"
+                }`}
+              >
+                <div className="flex flex-row items-center gap-2">
+                  <div className="w-4 h-4 flex items-center justify-center">
+                    {(updatedSettings.asrCalculationMethod === "Shafi" || !updatedSettings.asrCalculationMethod) && (
+                      <IconCheck size={16} className={`text-${window.api.getColor()}-500`} strokeWidth={3} />
+                    )}
+                  </div>
+                  <span className="text-sm font-medium">{t("asr_early")}</span>
+                  {asrTimes.shafi && (
+                    <div className="flex flex-row items-center gap-1 ms-auto">
+                      <IconCloud size={16} className={`text-${window.api.getColor()}-500`} />
+                      <span className="text-sm font-medium text-text">
+                        {moment(asrTimes.shafi).format("hh:mm")}
+                        <span className="text-xs px-1">
+                          {moment(asrTimes.shafi).locale(i18n.language).format("A")}
+                        </span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-text-2 ps-6 text-start">{t("asr_early_description")}</span>
+              </div>
+              <div 
+                onClick={() => handleChange("asrCalculationMethod", "Hanafi")}
+                className={`flex flex-col gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
+                  updatedSettings.asrCalculationMethod === "Hanafi"
+                    ? `border-${window.api.getColor()}-500 bg-bg-color-2`
+                    : "border-bg-color-3 bg-bg-color-2"
+                }`}
+              >
+                <div className="flex flex-row items-center gap-2">
+                  <div className="w-4 h-4 flex items-center justify-center">
+                    {updatedSettings.asrCalculationMethod === "Hanafi" && (
+                      <IconCheck size={16} className={`text-${window.api.getColor()}-500`} strokeWidth={3} />
+                    )}
+                  </div>
+                  <span className="text-sm font-medium">{t("asr_late")}</span>
+                  {asrTimes.hanafi && (
+                    <div className="flex flex-row items-center gap-1 ms-auto">
+                      <IconCloud size={16} className={`text-${window.api.getColor()}-500`} />
+                      <span className="text-sm font-medium text-text">
+                        {moment(asrTimes.hanafi).format("hh:mm")}
+                        <span className="text-xs px-1">
+                          {moment(asrTimes.hanafi).locale(i18n.language).format("A")}
+                        </span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-text-2 ps-6 text-start">{t("asr_late_description")}</span>
               </div>
             </div>
           </div>
@@ -733,7 +842,7 @@ const Settings = () => {
                 onChange={(e) => handleWidgetSettingChange("borderRadius", parseInt(e.target.value))}
                 className="flex-1"
               />
-              <span className="text-sm font-mono min-w-12 text-center">
+              <span className="text-sm font-mono min-w-12 text-start">
                 {widgetSettings.borderRadius}px
               </span>
             </div>
@@ -757,7 +866,7 @@ const Settings = () => {
                 onChange={(e) => handleWidgetSettingChange("backgroundOpacity", parseInt(e.target.value))}
                 className="flex-1"
               />
-              <span className="text-sm font-mono min-w-16 text-center">
+              <span className="text-sm font-mono min-w-16 text-start">
                 {widgetSettings.backgroundOpacity}%
               </span>
             </div>

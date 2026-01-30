@@ -34,6 +34,9 @@ module.exports = {
       pattern:
         /^border(-[yxbt]-|-)(green|blue|red|yellow|purple)-[1-9][0-9]{2}$/,
     },
+    {
+      pattern: /^accent-(green|blue|red|yellow|purple)-[1-9][0-9]{2}$/,
+    },
   ],
   theme: {
     extend: {

@@ -2,7 +2,7 @@
 import "./App.css";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
+import { Coordinates, CalculationMethod, Madhab, PrayerTimes } from "adhan";
 
 import Header from "./components/Home/Header";
 import Home from "./components/Home/Home";
@@ -45,9 +45,9 @@ function MainApp() {
     const overlay = urlParams.get("overlay");
     const widgets = urlParams.get("widgets");
     const widgetParam = urlParams.get("widget");
-    
+
     console.log("App mode check:", { overlay, widgets, widgetParam });
-    
+
     if (overlay === "true" && widgetParam) {
       try {
         const widget = JSON.parse(decodeURIComponent(widgetParam));
@@ -71,10 +71,20 @@ function MainApp() {
 
   const calculatePrayerTimes = () => {
     const coordinates = new Coordinates(data.latitude, data.longitude) || null;
-    const method =
+    const params =
       CalculationMethod[settings.calculationMethod || "UmmAlQura"]();
+    params.madhab =
+      settings.asrCalculationMethod === "Hanafi" ? Madhab.Hanafi : Madhab.Shafi;
+
+    const calculationMethod = settings.calculationMethod || "UmmAlQura";
+    const shafiParams = CalculationMethod[calculationMethod]();
+    shafiParams.madhab = Madhab.Shafi;
+
+    const hanafiParams = CalculationMethod[calculationMethod]();
+    hanafiParams.madhab = Madhab.Hanafi;
+
     const date = new Date();
-    const prayerTimes = new PrayerTimes(coordinates, date, method);
+    const prayerTimes = new PrayerTimes(coordinates, date, params);
 
     // Get prayer time corrections from settings
     const corrections = settings.prayerTimeCorrections || {};
@@ -83,7 +93,9 @@ function MainApp() {
     const applyCorrectionToTime = (time, prayerName) => {
       if (corrections[prayerName]) {
         const correctedTime = new Date(time);
-        correctedTime.setMinutes(correctedTime.getMinutes() + corrections[prayerName]);
+        correctedTime.setMinutes(
+          correctedTime.getMinutes() + corrections[prayerName]
+        );
         return correctedTime;
       }
       return time;
@@ -103,9 +115,12 @@ function MainApp() {
       const currentIndex = fivePrayers.indexOf(currentPrayer);
       nextPrayer = fivePrayers[(currentIndex + 1) % fivePrayers.length];
     }
-    
+
     // Apply corrections to next prayer time
-    const nextPrayerTime = applyCorrectionToTime(prayerTimes.timeForPrayer(nextPrayer), nextPrayer);
+    const nextPrayerTime = applyCorrectionToTime(
+      prayerTimes.timeForPrayer(nextPrayer),
+      nextPrayer
+    );
 
     // Filter out sunrise and none from prayer times and format the data to be used in the Home component
     const filteredTimes = {
@@ -170,11 +185,23 @@ function MainApp() {
       },
     };
 
+    // Create asr settings with corrections applied
+    const hanafiAsrTimes = new PrayerTimes(coordinates, date, hanafiParams);
+    const shafiAsrTimes = new PrayerTimes(coordinates, date, shafiParams);
+    
     return {
       times: filteredTimes,
       currentPrayer: currentPrayer === "sunrise" ? "fajr" : currentPrayer,
       nextPrayer,
       nextPrayerTime,
+      asrSettings: {
+        hanafiAsr: {
+          asr: applyCorrectionToTime(hanafiAsrTimes.asr, "asr"),
+        },
+        shafiAsr: {
+          asr: applyCorrectionToTime(shafiAsrTimes.asr, "asr"),
+        },
+      },
     };
   };
 
@@ -183,7 +210,7 @@ function MainApp() {
     if (isWidgetsMode || isOverlayMode) {
       return;
     }
-    
+
     const fetchLocationData = async () => {
       try {
         const locationData = await window.api.getLocationData();
@@ -198,16 +225,16 @@ function MainApp() {
       currentPage.startsWith("quran-audio")
         ? "audio_quran"
         : currentPage.startsWith("azkar-")
-        ? "azkar"
-        : currentPage
+          ? "azkar"
+          : currentPage
     )}`;
     console.log(
       `setting title to ${t("noor")} - ${t(
         currentPage.startsWith("quran-audio")
           ? "audio_quran"
           : currentPage.startsWith("azkar-")
-          ? "azkar"
-          : currentPage
+            ? "azkar"
+            : currentPage
       )}`,
       t
     );
@@ -218,7 +245,7 @@ function MainApp() {
     if (isWidgetsMode || isOverlayMode) {
       return;
     }
-    
+
     if (data) {
       setPrayers(calculatePrayerTimes());
     }
@@ -234,9 +261,12 @@ function MainApp() {
     };
   }, []);
 
-  setInterval(() => {
-    setPrayers(calculatePrayerTimes());
-  }, 1000 * 60 * 60);
+  setInterval(
+    () => {
+      setPrayers(calculatePrayerTimes());
+    },
+    1000 * 60 * 60
+  );
 
   // If in widgets mode, show only the widgets
   if (isWidgetsMode) {
@@ -284,7 +314,8 @@ function MainApp() {
               <Home prayersData={prayers} />
             </>
           )}
-          {(currentPage.startsWith("quran-audio") || currentPage.startsWith("playlist-")) && (
+          {(currentPage.startsWith("quran-audio") ||
+            currentPage.startsWith("playlist-")) && (
             <AudioLayout key="audio-layout" />
           )}
           {currentPage.startsWith("azkar-") && (
@@ -308,10 +339,10 @@ function MainApp() {
 function App() {
   return (
     <PageProvider>
-        <MainApp />
-        <SoundPlayer />
-        <UpdateNotification />
-        <AudioPlayer />
+      <MainApp />
+      <SoundPlayer />
+      <UpdateNotification />
+      <AudioPlayer />
     </PageProvider>
   );
 }

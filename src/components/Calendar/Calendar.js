@@ -447,6 +447,11 @@ const Calendar = () => {
             );
           })}
         </div>
+        <div className="mt-4">
+        <p className="text-sm text-text-2 text-start leading-relaxed">
+          * {t("calendar_note")}
+        </p>
+      </div>
       </div>
 
       {/* Events List for Current Month */}
@@ -497,6 +502,7 @@ const Calendar = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
