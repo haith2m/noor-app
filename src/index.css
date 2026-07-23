@@ -342,3 +342,8 @@ input[type="range"]::-moz-range-thumb {
   border: none;
   transition: .2s ease-in-out;
 }
+
+/* Hide TitleBar and Sidebar when Quran is in focus/maximize mode */
+body.quran-maximized .fixed.z-50 {
+  display: none;
+}
