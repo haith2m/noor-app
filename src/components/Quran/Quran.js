@@ -39,6 +39,18 @@ function Quran() {
     return arr;
   }, [selectedSurah, surahRange.start, surahRange.end]);
 
+  const [isMaximized, setIsMaximized] = useState(false);
+
+  // Add body class when maximized so TitleBar hides via CSS
+  useEffect(() => {
+    if (isMaximized) {
+      document.body.classList.add("quran-maximized");
+    } else {
+      document.body.classList.remove("quran-maximized");
+    }
+    return () => document.body.classList.remove("quran-maximized");
+  }, [isMaximized]);
+
   const [tafsirOpen, setTafsirOpen] = useState(false);
   const [tafsirLoading, setTafsirLoading] = useState(false);
   const [tafsirError, setTafsirError] = useState(null);
@@ -227,7 +239,13 @@ function Quran() {
       if (!selectedSurah) return;
 
       if (e.key === "Escape") {
+        if (isMaximized) { setIsMaximized(false); return; }
         if (tafsirOpen) setTafsirOpen(false);
+        return;
+      }
+
+      if (e.key === "f" || e.key === "F") {
+        setIsMaximized((v) => !v);
         return;
       }
 
@@ -250,7 +268,7 @@ function Quran() {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentPage, selectedSurah, surahRange.start, surahRange.end, tafsirOpen]);
+  }, [currentPage, selectedSurah, surahRange.start, surahRange.end, tafsirOpen, isMaximized]);
 
   const handleSearch = (e) => setSearchText(e.target.value);
 
@@ -376,20 +394,28 @@ function Quran() {
   }
 
   return (
-    <div className="pt-6 bg-transparent text-text transition-all fadeIn h-[calc(100vh-4rem)] flex flex-row gap-4 overflow-hidden">
-      <SurahList
-        surahs={surahs}
-        searchText={searchText}
-        onSearch={handleSearch}
-        selectedSurah={selectedSurah}
-        currentPage={currentPage}
-        onSelectSurah={handleSelectSurah}
-        onResetProgress={handleResetProgress}
-        scale={scale}
-        onScaleChange={setScaleUser}
-        onToggleTafsir={() => setTafsirOpen((v) => !v)}
-        surahIndicatorRef={surahIndicatorRef}
-      />
+    <div
+      className={`bg-transparent text-text transition-all fadeIn flex flex-row gap-4 overflow-hidden ${
+        isMaximized
+          ? "fixed inset-0 z-[60] bg-bg-color pt-0"
+          : "pt-6 h-[calc(100vh-4rem)]"
+      }`}
+    >
+      {!isMaximized && (
+        <SurahList
+          surahs={surahs}
+          searchText={searchText}
+          onSearch={handleSearch}
+          selectedSurah={selectedSurah}
+          currentPage={currentPage}
+          onSelectSurah={handleSelectSurah}
+          onResetProgress={handleResetProgress}
+          scale={scale}
+          onScaleChange={setScaleUser}
+          onToggleTafsir={() => setTafsirOpen((v) => !v)}
+          surahIndicatorRef={surahIndicatorRef}
+        />
+      )}
 
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
         <TafsirPanel
@@ -415,6 +441,9 @@ function Quran() {
           pageViewerRef={pageViewerRef}
           onPageChange={handlePageChange}
           tafsirOpen={tafsirOpen}
+          isMaximized={isMaximized}
+          onToggleMaximize={() => setIsMaximized((v) => !v)}
+          onScaleChange={setScaleUser}
         />
       </div>
     </div>
